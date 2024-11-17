@@ -16,41 +16,41 @@ $(document).ready(function () {
 
     // Reinitialize Select2 for the newly added row
     newFormRow.find(".js-product-search").select2({
-        placeholder: "Type to search for products",
-        minimumInputLength: 2,
-        ajax: {
-            url: `${adminBaseUrl}/modules/superproductgroups/ajax-products`, // AJAX endpoint
-            dataType: "json",
-            delay: 250,
-            data: function (params) {
-                return {
-                    q: params.term, // Search term
-                    _token: adminToken, // Include CSRF token
-                };
-            },
-            processResults: function (data) {
-                return {
-                    results: data.results.map(function (product) {
-                        return {
-                            id: product.id,
-                            text: product.text,
-                        };
-                    }),
-                };
-            },
+      placeholder: "Type to search for products",
+      minimumInputLength: 2,
+      ajax: {
+        url: `${adminBaseUrl}/modules/superproductgroups/ajax-products`, // AJAX endpoint
+        dataType: "json",
+        delay: 250,
+        data: function (params) {
+          return {
+            q: params.term, // Search term
+            _token: adminToken, // Include CSRF token
+          };
         },
-        templateResult: function (product) {
-            if (!product.id) {
-                return product.text;
-            }
-            return $("<span>" + product.text + "</span>");
+        processResults: function (data) {
+          return {
+            results: data.results.map(function (product) {
+              return {
+                id: product.id,
+                text: product.text,
+              };
+            }),
+          };
         },
-        templateSelection: function (product) {
-            return product.text || product.id;
-        },
-        allowClear: true, // Enable clearing the selection
+      },
+      templateResult: function (product) {
+        if (!product.id) {
+          return product.text;
+        }
+        return $("<span>" + product.text + "</span>");
+      },
+      templateSelection: function (product) {
+        return product.text || product.id;
+      },
+      allowClear: true, // Enable clearing the selection
     });
-});
+  });
 
   // Event delegation for dynamically added rows
   $("#group-rows").on("click", ".remove-row", function () {
@@ -75,8 +75,12 @@ $(document).ready(function () {
         const name = input.attr("name");
         const value = input.val();
 
-        // If the input is a file, handle it differently
-        if (input.attr("type") === "file" && input[0].files.length > 0) {
+        if (input.is("select[multiple]")) {
+          // Handle multiple selections
+          if (value) {
+            value.forEach((val) => formData.append(name, val));
+          }
+        } else if (input.attr("type") === "file" && input[0].files.length > 0) {
           formData.append(name, input[0].files[0]);
         } else {
           formData.append(name, value);

@@ -1,80 +1,75 @@
 $(document).ready(function () {
-  const $groupModal = $("#group-modal");
+  const $groupPopup = $("#group-popup");
   const $groupProductsContainer = $("#group-products");
   const $productSearchInput = $("#group-product-search");
 
-  // Open group modal and fetch products via AJAX
-  $(".js-open-group-modal").on("click", function () {
-    const groupId = $(this).data("group-id");
+  // Open side popup and populate products
+  $(".js-open-group-popup").on("click", function (e) {
+    e.preventDefault();
+      const products = $(this).data("products");
 
-    // Fetch group products
-    $.ajax({
-      url: ajax_url,
-      type: "GET",
-      data: {
-        action: "getGroupProducts",
-        group_id: groupId,
-      },
-      success: function (data) {
-        // Populate the modal with products
-        const productsHtml = data.products
-          .map(
-            (product) =>
-              `<div>
-                  <input type="checkbox" id="product-${product.id_product}" value="${product.id_product}" />
-                  <label for="product-${product.id_product}">${product.name}</label>
-              </div>`
-          )
-          .join("");
-        $groupProductsContainer.html(productsHtml);
+      // Populate the popup with products
+      if (products && products.length > 0) {
+          const productsHtml = products
+              .map(
+                  (product) =>
+                      `<div class="custom-check">
+                          <input
+                              class="custom-check-input"
+                              type="checkbox"
+                              id="product-${product.id}"
+                              value="${product.id}"
+                          />
+                          <label class="custom-check-label" for="product-${product.id}">
+                              ${product.name} - $${parseFloat(product.price).toFixed(2)}
+                          </label>
+                      </div>`
+              )
+              .join("");
+          $groupProductsContainer.html(productsHtml);
+      } else {
+          $groupProductsContainer.html("<p>No products found for this group.</p>");
+      }
 
-        // Show the modal
-        $groupModal.modal("show");
-      },
-    });
+      // Show the popup
+      $groupPopup.addClass("visible");
   });
 
   // Handle product search
   $productSearchInput.on("input", function () {
-    const searchQuery = $(this).val();
-    const groupId = $(".js-open-group-modal").data("group-id");
+      const searchQuery = $(this).val().toLowerCase();
+      const $productItems = $groupProductsContainer.find(".custom-check");
 
-    // Fetch filtered group products
-    $.ajax({
-      url: ajax_url,
-      type: "GET",
-      data: {
-        action: "getGroupProducts",
-        group_id: groupId,
-        search: searchQuery,
-      },
-      success: function (data) {
-        const productsHtml = data.products
-          .map(
-            (product) =>
-              `<div>
-                  <input type="checkbox" id="product-${product.id_product}" value="${product.id_product}" />
-                  <label for="product-${product.id_product}">${product.name}</label>
-              </div>`
-          )
-          .join("");
-        $groupProductsContainer.html(productsHtml);
-      },
-    });
+      $productItems.each(function () {
+          const $item = $(this);
+          const productName = $item.find("label").text().toLowerCase();
+
+          // Show/hide based on the search query
+          if (productName.includes(searchQuery)) {
+              $item.show();
+          } else {
+              $item.hide();
+          }
+      });
   });
 
-  // Handle confirmation
+  // Handle confirmation of selected products
   $(".js-confirm-selection").on("click", function () {
-    const selectedProducts = $groupProductsContainer
-      .find("input:checked")
-      .map(function () {
-        return $(this).val();
-      })
-      .get();
+      const selectedProducts = $groupProductsContainer
+          .find("input:checked")
+          .map(function () {
+              return $(this).val();
+          })
+          .get();
 
-    console.log("Selected Products:", selectedProducts); // Handle as needed
+      console.log("Selected Products:", selectedProducts); // Replace with your logic
 
-    // Hide the modal
-    $groupModal.modal("hide");
+      // Hide the popup
+      $groupPopup.removeClass("visible");
+  });
+
+  // Close popup
+  $(".js-close-popup").on("click", function () {
+      $groupPopup.removeClass("visible");
   });
 });
