@@ -1,0 +1,23 @@
+superproductgroups_display_form:
+  path: /superproductgroups/display-form
+  methods: [GET]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::displayForm'
+
+superproductgroups_handle_form_submit:
+  path: /superproductgroups/handle-form-submit
+  methods: [POST]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::handleFormSubmit'
+
+superproductgroups_ajax_products:
+  path: /superproductgroups/ajax-products
+  methods: [GET]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::ajaxProducts'
+
+superproductgroups_ajax_groups:
+  path: /superproductgroups/ajax-groups
+  methods: [GET]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::ajaxGroups'

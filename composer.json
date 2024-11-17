@@ -1,0 +1,32 @@
+{
+  "name": "prestashopcorp/superproductgroups",
+  "description": "a super product group module example",
+  "type": "prestashop-module",
+  "authors": [
+    {
+      "name": "Oussama Elmaaroufy",
+      "email": "slashnpro@gmail.com"
+    }
+  ],
+  "license": "AFL-3.0",
+  "autoload": {
+    "classmap": [
+      "superproductgroups.php"
+    ],
+    "psr-4": {
+      "PrestaShop\\Module\\SuperProductGroups\\": "src/"
+    }
+  },
+  "config": {
+    "preferred-install": "dist",
+    "platform": {
+      "php": "7.2.5"
+    },
+    "optimize-autoloader": true,
+    "prepend-autoloader": false,
+    "platform-check": false
+  },
+  "require": {
+    "php": ">=7.2.5"
+  }
+}

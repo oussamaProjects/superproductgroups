@@ -1,0 +1,23 @@
+services:
+
+  PrestaShop\Module\SuperProductGroups\Service\GroupService:
+    public: true
+    autowire: true
+
+  PrestaShop\Module\SuperProductGroups\Form\Modifier\ProductFormModifier:
+    autowire: true
+    public: true
+    arguments:
+      $formBuilderModifier: "@form.form_builder_modifier"
+
+  PrestaShop\Module\SuperProductGroups\Form\Type\GroupFormType:
+    public: true
+    arguments:
+      $groupService: '@PrestaShop\Module\SuperProductGroups\Service\GroupService'
+    tags:
+      - { name: form.type }
+
+  PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController:
+    public: true
+    tags:
+      - { name: "controller.service_arguments" }
