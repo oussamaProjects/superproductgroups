@@ -52,14 +52,6 @@ $(document).ready(function () {
     });
   });
 
-  // Event delegation for dynamically added rows
-  $("#group-rows").on("click", ".remove-row", function () {
-    // Confirm before removing
-    if (confirm("Are you sure you want to remove this row?")) {
-      $(this).closest(".group-entry").remove();
-    }
-  });
-
   // AJAX form submission
   $("#save-form").on("click", function (e) {
     e.preventDefault();
@@ -98,15 +90,14 @@ $(document).ready(function () {
         $("#message-container").html(
           '<div class="alert alert-success">' + response.message + "</div>"
         );
+        window.location.reload();
       },
-      error: function (xhr) {
+      error: function (response) {
         // Handle error response (e.g., display error message)
-        const errors = xhr.responseJSON.errors || [
-          "An unexpected error occurred",
-        ];
         $("#message-container").html(
-          '<div class="alert alert-danger">' + errors.join("<br>") + "</div>"
+          '<div class="alert alert-danger">' + response.message + "</div>"
         );
+        window.location.reload();
       },
     });
   });
@@ -215,7 +206,6 @@ $(document).ready(function () {
         $productList.html(productsHtml);
 
         console.log("Products HTML:", productsHtml);
-
       },
     });
   });
@@ -380,31 +370,30 @@ $(document).ready(function () {
     });
   });
 
-  const $deleteGroupButton = $("#delete-group");
-
-  // Handle Save Products Button Click
-  $deleteGroupButton.on("click", function () {
-    groupId = $(this).data("group-id");
-
-    $.ajax({
-      url: `${adminBaseUrl}/modules/superproductgroups/delete-group?_token=${adminToken}`,
-      type: "POST",
-      data: {
-        groupId: groupId, // Group ID to delete
-      },
-      success: function (response) {
-        alert(response.message);
-        // Optionally refresh the group list or update the UI
-      },
-      error: function (xhr) {
-        alert("Erreur lors de la suppression du groupe.");
-      },
-    });
+  $(document).on("click", ".js-delete-group", function (e) {
+    e.preventDefault();
+    deleteButton = $(this);
+    groupId = deleteButton.data("group-id");
+    if (confirm("Are you sure you want to remove this row?")) {
+      $.ajax({
+        url: `${adminBaseUrl}/modules/superproductgroups/delete-group?_token=${adminToken}`,
+        type: "POST",
+        data: {
+          groupId: groupId, // Group ID to delete
+        },
+        success: function (response) {
+          alert(response.message);
+          // Optionally refresh the group list or update the UI
+          deleteButton.closest(".group-entry").remove();
+        },
+        error: function (xhr) {
+          alert("Erreur lors de la suppression du groupe.");
+        },
+      });
+    }
   });
 
-
   $(document).on("click", ".js-delete-all-products", function () {
-
     // Confirmation dialog
     if (
       !confirm(
@@ -432,26 +421,23 @@ $(document).ready(function () {
     });
   });
 
-
-
-  $(document).on('click', '.js-export-products', function () {
-
+  $(document).on("click", ".js-export-products", function () {
     // AJAX call to fetch group products
     $.ajax({
       url: `${adminBaseUrl}/modules/superproductgroups/export-group-products?_token=${adminToken}`,
-      type: 'GET',
+      type: "GET",
       data: {
         groupId: currentGroupId,
       },
       success: function (response) {
         // Create a blob for the CSV file
-        const blob = new Blob([response], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([response], { type: "text/csv;charset=utf-8;" });
 
         // Generate a download link
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `group_${currentGroupId}_products.csv`);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `group_${currentGroupId}_products.csv`);
         document.body.appendChild(link);
         link.click();
 

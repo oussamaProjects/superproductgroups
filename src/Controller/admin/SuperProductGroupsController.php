@@ -47,30 +47,11 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
       }
     }
 
-    $submittedGroupIds = array_filter(array_column($groups, 'group_id'));
-    $existingGroupIds = $this->getExistingGroupIds();
-
-    $this->handleGroupDeletions($existingGroupIds, $submittedGroupIds);
     $this->saveOrUpdateGroups($groups, $superProductId);
 
     return new JsonResponse(['status' => 'success', 'message' => 'Groups saved successfully']);
   }
 
-  /**
-   * Deletes groups and their associated product relationships.
-   */
-  private function handleGroupDeletions(array $existingGroupIds, array $submittedGroupIds): void
-  {
-    $groupsToDelete = array_diff($existingGroupIds, $submittedGroupIds);
-
-    if (!empty($groupsToDelete)) {
-      $db = \Db::getInstance();
-      $ids = implode(',', array_map('intval', $groupsToDelete));
-
-      $db->delete('product_group_relationship', 'id_group IN (' . $ids . ')');
-      $db->delete('product_group', 'id_group IN (' . $ids . ')');
-    }
-  }
 
   /**
    * Saves or updates groups and their associated products.
@@ -230,8 +211,6 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
     $db = \Db::getInstance();
 
     try {
-      // Begin transaction
-      $db->beginTransaction();
 
       // Delete all product associations for the group
       $db->delete('product_group_relationship', 'id_group = ' . (int)$groupId);
@@ -239,12 +218,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
       // Delete the group itself
       $db->delete('product_group', 'id_group = ' . (int)$groupId);
 
-      // Commit transaction
-      $db->commit();
-
       return new JsonResponse(['status' => 'success', 'message' => 'Group and its products deleted successfully']);
     } catch (\Exception $e) {
-      // Rollback on error
       $db->rollBack();
 
       // Log the error for debugging

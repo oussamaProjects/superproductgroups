@@ -94,19 +94,16 @@ class SuperProductGroups extends Module
 
     // Retrieve groups for this product
     $formData = $this->getFormData();
-
     // Create the form
     $formFactory = $this->get('form.factory');
     $form = $formFactory->create(GroupFormType::class, $formData);
 
     /** @var EngineInterface $twig */
     $twig = $this->get('twig');
-    $adminToken = \Tools::getAdminTokenLite('AdminModules');
 
     return $twig->render('@Modules/superproductgroups/views/templates/admin/group_form.html.twig', [
       'super_product' => $super_product,
       'form' => $form->createView(), // Pass the form view to the template
-      'admin_token' => $adminToken,
     ]);
   }
 

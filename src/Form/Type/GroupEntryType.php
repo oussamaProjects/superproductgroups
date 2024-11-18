@@ -30,7 +30,10 @@ class GroupEntryType extends AbstractType
       ->add('group_image', FileType::class, [
         'label' => 'Group Image',
         'required' => false,
-        'mapped' => false, // Prevent mapping to preloaded data
+        'mapped' => false,
+        'attr' => [
+          'accept' => 'image/*', // Limit file types to images
+        ],
       ])
       ->add('group_products', ChoiceType::class, [
         'label' => 'Select Products',
