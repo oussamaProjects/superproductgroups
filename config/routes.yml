@@ -10,14 +10,50 @@ superproductgroups_handle_form_submit:
   defaults:
     _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::handleFormSubmit'
 
+superproductgroups_save_group_products:
+  path: /superproductgroups/save-group-products
+  methods: [POST]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::saveGroupProducts'
+
+superproductgroups_delete_group:
+  path: /superproductgroups/delete-group
+  methods: [POST]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::deleteGroup'
+
+superproductgroups_delete_group_product:
+  path: /superproductgroups/delete-group-product
+  methods: [POST]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::deleteGroupProduct'
+
+superproductgroups_delete_group_products:
+  path: /superproductgroups/delete-group-products
+  methods: [POST]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::deleteGroupProducts'
+
 superproductgroups_ajax_products:
   path: /superproductgroups/ajax-products
   methods: [GET]
   defaults:
     _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::ajaxProducts'
 
+superproductgroups_ajax_group_products:
+  path: /superproductgroups/ajax-group-products
+  methods: [GET]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::ajaxGroupProducts'
+
 superproductgroups_ajax_groups:
   path: /superproductgroups/ajax-groups
   methods: [GET]
   defaults:
     _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::ajaxGroups'
+
+superproductgroups_export_group_products:
+  path: /superproductgroups/export-group-products
+  methods: [GET]
+  defaults:
+    _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::exportGroupProducts'

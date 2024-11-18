@@ -1,32 +1,15 @@
-<div id="product-groups">
-  <h3>Available Groups</h3>
-  <ul class="list-unstyled">
+<div id="list-super-product-groups">
+  <h3>Les éclatés techniques pour</h3>
+  <ul class="list-super-product-groups">
     {foreach from=$groups item=group}
-      <li class="mb-2">
-
-        <div class="group-header">
-          <img src="{$group.image}" alt="{$group.name|escape:'html'}" class="group-image" />
-          <span class="group-name">{$group.name|escape:'html'}</span>
-          <button class="btn btn-primary js-open-group-popup" data-group-id="{$group.id}"
-            data-products="{$group.products|json_encode|escape:'html'}">
-            View {$group.name|escape:'html'}
-          </button>
-        </div>
-        <div class="group-products">
-          {if $group.products|@count > 0}
-            <ul class="list-unstyled">
-              {foreach from=$group.products item=product}
-                <li class="product-item">
-                  <span>{$product.name|escape:'html'}</span>
-                  <span class="product-price">{$product.price|number_format:2:'.':','} $</span>
-                </li>
-              {/foreach}
-            </ul>
-          {else}
-            <p>No products available in this group.</p>
-          {/if}
-        </div>
-
+      <li class="list-super-product-group-item">
+        {* <img src="{$group.image}" alt="{$group.name|escape:'html'}" class="group-image" /> *}
+        {* <span class="group-name">{$group.name|escape:'html'}</span> *}
+        <span class="js-open-group-popup" data-group-id="{$group.id}"
+          data-products="{$group.products|json_encode|escape:'html'}">
+          01 - {$group.name|escape:'html'}
+          <i class="fa fa-chevron-right"></i>
+        </span>
       </li>
     {/foreach}
   </ul>
@@ -35,10 +18,23 @@
 <!-- Side popup for displaying products in the selected group -->
 <div id="group-popup" class="side-popup">
   <div class="side-popup-header">
-    <h5>Group Products</h5>
+    <h5>Ma sélection</h5>
+    <span>Scroller ou Rechercher :</span>
     <button type="button" class="btn-close js-close-popup" aria-label="Close"></button>
   </div>
-  <input type="text" id="group-product-search" placeholder="Search products..." class="group-product-search form-control" />
+
+  <div class="side-popup-search">
+    <div class="side-popup-search-controller">
+      <label>Numéro : </label>
+      <input type="text" id="group-product-search-num" class="group-product-search form-control" />
+    </div>
+
+    <div class="side-popup-search-controller">
+      <label>Mot clé : </label>
+      <input type="text" id="group-product-search" class="group-product-search form-control" />
+    </div>
+  </div>
+
   <div class="side-popup-body">
     <div id="group-products" class=""></div>
   </div>

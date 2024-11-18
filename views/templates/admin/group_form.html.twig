@@ -19,12 +19,19 @@
 					<div class="col-md-4">
 						{{ form_widget(group.group_image) }}
 					</div>
+					{# <div class="col-md-4">
+																{{ form_widget(group.group_products) }}
+															</div> #}
+
 					<div class="col-md-4">
-						{{ form_widget(group.group_products) }}
+						<button type="button" class="btn btn-secondary js-open-product-popup" data-group-id="{{ group.group_id.vars.value }}" data-group-products="{{ group.group_products.vars.value|join(',') }}">
+							Products:
+							<span class="product-count">{{ group.group_products.vars.value|length }}</span>
+						</button>
 					</div>
 
 					<div class="col-md-1">
-						<button type="button" class="btn btn-danger remove-row">Remove</button>
+						<button type="button" class="btn btn-danger remove-row w-full">Remove</button>
 					</div>
 				</div>
 			</div>
@@ -32,15 +39,53 @@
 	</div>
 
 	<div class="row mt-4">
-		<div class="col text-start">
+		<div class="col-md-11 text-start">
 			<button type="button" id="add-row" class="btn btn-secondary">Add Row</button>
 		</div>
-		<div class="col text-end">
-			<button type="submit" id="save-form" class="btn btn-primary">Save</button>
+		<div class="col-md-1 text-end">
+			<button type="submit" id="save-form" class="btn btn-primary w-full">Save</button>
 		</div>
 	</div>
 
 	{{ form_end(form) }}
 
 	<div id="message-container" class="mt-3"></div>
+</div>
+
+
+<!-- Popup -->
+<div id="product-popup" class="popup-overlay">
+	<div class="popup-content">
+		<div class="popup-header">
+			<h3>Ajouter des Produits</h3>
+			<button type="button" class="btn-close" id="close-popup" aria-label="Close"></button>
+		</div>
+
+		<!-- Search and Actions -->
+		<div class="popup-actions">
+			<div class="action-buttons">
+				<button type="button" class="btn btn-secondary js-export-products">Exporter</button>
+				<button type="button" class="btn btn-secondary">Importer</button>
+				<button type="button" class="btn btn-danger js-delete-all-products">Supprimer tous les produits</button>
+			</div>
+		</div>
+
+
+		<!-- Add Product -->
+		<div class="add-product">
+			<input type="text" id="add-product-name" class="js-add-product-name form-control mb-2" placeholder="Nom du produit" autocomplete="off"/>
+			<ul id="autocomplete-dropdown" class="dropdown-menu" style="display: none;"></ul>
+			<button type="button" class="btn btn-primary" id="add-product">Ajouter</button>
+		</div>
+
+		<ul
+			id="product-list" class="list-group mt-3"><!-- Dynamically added products will appear here -->
+		</ul>
+
+		<!-- Save Button -->
+		<div class="popup-footer mt-3 text-end">
+			<button type="button" class="btn btn-success" id="save-products">Enregistrer</button>
+		</div>
+
+	</div>
 </div>

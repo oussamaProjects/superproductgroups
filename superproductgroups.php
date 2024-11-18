@@ -160,7 +160,7 @@ class SuperProductGroups extends Module
     );
 
     // Join product_shop for shop-specific details
-    $sql->innerJoin(
+    $sql->leftJoin(
       'product_shop',
       'ps',
       'p.id_product = ps.id_product AND ps.id_shop = ' . (int) \Shop::getContextShopID()
@@ -208,16 +208,17 @@ class SuperProductGroups extends Module
 
   private function getThisProductGroupsWithProducts(int $productId)
   {
-
     $sql = new \DbQuery();
     $sql->select('
-            pg.id_group AS id_group,
-            pg.name AS group_name,
-            pg.image AS group_image,
-            p.id_product AS product_id,
-            pl.name AS product_name,
-            p.price AS product_price
-        ');
+          pg.id_group AS id_group,
+          pg.name AS group_name,
+          pg.image AS group_image,
+          p.id_product AS product_id,
+          pl.name AS product_name,
+          ps.price AS product_price,
+          pi.id_image AS product_image_id,
+          pl.link_rewrite AS link_rewrite
+      ');
     $sql->from('product_group', 'pg');
 
     // Join product_group_relationship to link groups with products
@@ -238,7 +239,7 @@ class SuperProductGroups extends Module
     $sql->innerJoin(
       'product_shop',
       'ps',
-      'p.id_product = ps.id_product AND ps.id_shop = ' . (int) \Shop::getContextShopID()
+      'p.id_product = ps.id_product AND ps.id_shop = ' . (int)\Shop::getContextShopID()
     );
 
     // Join product_lang for product names in the current language
@@ -246,8 +247,15 @@ class SuperProductGroups extends Module
       'product_lang',
       'pl',
       'p.id_product = pl.id_product
-            AND pl.id_lang = ' . (int) \Context::getContext()->language->getId() . '
-            AND pl.id_shop = ' . (int) \Shop::getContextShopID()
+              AND pl.id_lang = ' . (int)\Context::getContext()->language->getId() . '
+              AND pl.id_shop = ' . (int)\Shop::getContextShopID()
+    );
+
+    // Join image table for image IDs
+    $sql->leftJoin(
+      'image',
+      'pi',
+      'p.id_product = pi.id_product AND pi.cover = 1' // Ensure the cover image is fetched
     );
 
     $sql->where('pg.id_super_product = ' . (int)$productId);
@@ -257,6 +265,9 @@ class SuperProductGroups extends Module
     if (!$result) {
       return [];
     }
+
+    // Initialize Link object to generate image URLs
+    $link = new \Link();
 
     // Process results into a structured format
     $groups = [];
@@ -271,10 +282,22 @@ class SuperProductGroups extends Module
       }
 
       if (!empty($row['product_id'])) {
+        $imageUrl = null;
+
+        // Generate the full product image URL
+        if (!empty($row['product_image_id'])) {
+          $imageUrl =  "http://" .  $link->getImageLink(
+            $row['link_rewrite'], // SEO-friendly URL
+            $row['product_id'] . '-' . $row['product_image_id'],
+            'small_default'
+          );
+        }
+
         $groups[$row['id_group']]['products'][] = [
           'id' => $row['product_id'],
           'name' => $row['product_name'],
-          'price' => $row['product_price'],
+          'price' => number_format((float)$row['product_price'], 2, '.', ''), // Format price to 2 decimals
+          'image' => $imageUrl,
         ];
       }
     }
