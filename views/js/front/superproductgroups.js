@@ -117,6 +117,86 @@ $(document).ready(function () {
     $selectedProductsPopup.addClass("visible");
   });
 
+  // Handle confirmation of selected products
+  $(".js-add-confirmed-selection-to-cart").on("click", function () {
+    if (!selectedProducts || selectedProducts.length === 0) {
+      console.warn("No products selected to add to the cart.");
+      return;
+    }
+
+    const totalProducts = selectedProducts.length;
+    let addedProducts = 0;
+
+    const addToCart = (product) => {
+      $.ajax({
+        url: prestashop.urls.pages.cart, // Use PrestaShop's built-in cart URL
+        type: "POST",
+        data: {
+          ajax: 1,
+          action: "update",
+          add: 1,
+          id_product: product.id,
+          id_customization: 0, // If customization is not required
+          id_product_attribute: 0, // If no specific attribute is selected
+          qty: 1, // Adjust quantity as needed
+        },
+        success: function () {
+          console.log(`Product ${product.name} added to cart successfully.`);
+          addedProducts++;
+
+          // Check if all products are added
+          if (addedProducts === totalProducts) {
+            showCompletionEffect();
+          }
+        },
+        error: function (xhr) {
+          console.error(
+            `Error adding product ${product.name} to cart:`,
+            xhr.responseText
+          );
+        },
+      });
+    };
+
+    const showCompletionEffect = () => {
+      // Add a success message
+      const $successMessage = $("<div>", {
+        class: "cart-success-message",
+        text: "All selected products have been added to the cart!",
+      }).appendTo("body");
+
+      // Style the success message
+      $successMessage.css({
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        background: "#28a745",
+        color: "#fff",
+        padding: "10px 20px",
+        borderRadius: "5px",
+        zIndex: 1000,
+        display: "none",
+      });
+
+      // Show the success message with fade-in effect
+      $successMessage
+        .fadeIn(300)
+        .delay(1500)
+        .fadeOut(300, function () {
+          $(this).remove(); // Remove the message after fading out
+        });
+
+
+        window.location.reload();
+
+      // Hide the popup
+      $selectedProductsPopup.removeClass("visible");
+    };
+
+    // Iterate over selected products and add them to the cart
+    selectedProducts.forEach(addToCart);
+  });
+
   // Close selected products popup
   $(".js-close-selected-popup").on("click", function () {
     $selectedProductsPopup.removeClass("visible");
