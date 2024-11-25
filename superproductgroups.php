@@ -93,7 +93,7 @@ class SuperProductGroups extends Module
     $super_product = new Product($productId);
 
     // Retrieve groups for this product
-    $formData = $this->getFormData();
+    $formData = $this->getFormData($productId );
     // Create the form
     $formFactory = $this->get('form.factory');
     $form = $formFactory->create(GroupFormType::class, $formData);
@@ -108,10 +108,10 @@ class SuperProductGroups extends Module
   }
 
 
-  public function getFormData(): array
+  public function getFormData($productId ): array
   {
     // Get groups with products from the existing method
-    $groupsWithProducts = $this->getGroupsWithProducts();
+    $groupsWithProducts = $this->getThisProductGroupsWithProducts($productId );
 
     // Initialize the $formData array
     $formData = ['groups' => []];
@@ -201,7 +201,6 @@ class SuperProductGroups extends Module
 
     return $groups;
   }
-
 
   private function getThisProductGroupsWithProducts(int $productId)
   {
@@ -302,7 +301,6 @@ class SuperProductGroups extends Module
     return $groups;
   }
 
-
   /**
    * Modify product form builder
    *
@@ -324,6 +322,7 @@ class SuperProductGroups extends Module
 
     // Fetch groups associated with this product
     $groups = $this->getThisProductGroupsWithProducts($productId);
+    dump($productId);
     dump($groups);
 
     // Assign data to the template
