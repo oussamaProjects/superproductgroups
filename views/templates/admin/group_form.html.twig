@@ -7,7 +7,22 @@
 	{{ form_start(form) }}
 	{{ form_errors(form) }}
 
-	<div id="group-rows" data-prototype="{{ form_widget(form.groups.vars.prototype)|e('html_attr') }}">
+  <div id="group-rows" data-prototype="
+    <div class='group-entry mb-3'>
+        <div class='row align-items-center'>
+            <div class='col-md-3'>
+                {{ form_widget(form.groups.vars.prototype['group_name'], {'attr': {'class': 'form-control'}})|e('html_attr') }}
+            </div>
+            <div class='col-md-4'>
+                {{ form_widget(form.groups.vars.prototype['group_image'], {'attr': {'class': 'form-control-file'}})|e('html_attr') }}
+            </div>
+            <div class='col-md-3'>
+                {{ form_widget(form.groups.vars.prototype['group_products'], {'attr': {'class': 'js-product-search form-control'}})|e('html_attr') }}
+            </div>
+        </div>
+    </div>
+">
+
 		{% for group in form.groups %}
 			<div class="group-entry mb-3">
 				<div class="row align-items-center">
@@ -29,14 +44,14 @@
 						{{ form_widget(group.group_image) }}
 					</div>
 
-					<div class="col-md-4">
-						<button type="button" class="btn btn-secondary js-open-product-popup" data-group-id="{{ group.group_id.vars.value }}" data-group-products="{{ group.group_products.vars.value|join(',') }}">
+					<div class="col-md-3">
+						<button type="button" class="btn btn-secondary js-open-product-popup w-full" data-group-id="{{ group.group_id.vars.value }}" data-group-products="{{ group.group_products.vars.value|join(',') }}">
 							Products:
 							<span class="product-count">{{ group.group_products.vars.value|length }}</span>
 						</button>
 					</div>
 
-					<div class="col-md-1">
+					<div class="col-md-2">
 						<button type="button" class="btn btn-danger js-delete-group w-full" data-group-id="{{ group.group_id.vars.value }}">Remove</button>
 					</div>
 				</div>
