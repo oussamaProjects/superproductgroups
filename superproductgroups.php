@@ -94,6 +94,7 @@ class SuperProductGroups extends Module
 
     // Retrieve groups for this product
     $formData = $this->getFormData($productId );
+
     // Create the form
     $formFactory = $this->get('form.factory');
     $form = $formFactory->create(GroupFormType::class, $formData);
@@ -322,8 +323,6 @@ class SuperProductGroups extends Module
 
     // Fetch groups associated with this product
     $groups = $this->getThisProductGroupsWithProducts($productId);
-    dump($productId);
-    dump($groups);
 
     // Assign data to the template
     $this->context->smarty->assign([

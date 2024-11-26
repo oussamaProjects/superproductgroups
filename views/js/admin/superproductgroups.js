@@ -1,5 +1,6 @@
 $(document).ready(function () {
-  let index = $("#group-rows .form-group").length; // Initial index for new rows
+  let index = $("#group-rows .group-entry").length; // Initial index for new rows
+console.log("index", index);
 
   // Add new row dynamically
   $("#add-row").on("click", function () {

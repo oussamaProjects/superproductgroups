@@ -31,14 +31,12 @@
 						{{ form_widget(group.group_name) }}
 					</div>
 
-					<div class="col-md-4">
+					<div class="col-md-4 d-flex align-items-center">
 
-						{# {{ dump(group.group_image.vars.data) }}
-						{{ dump(group.group_image.vars.value) }} #}
 						{# Check if the group already has an image saved #}
-						{% if group.group_image.vars.data %}
-							<div class="mb-2">
-								<img src="{{ group.group_image.vars.data }}" alt="Group Image" class="img-thumbnail" style="max-width: 100px;">
+						{% if group.vars['value']['group_image'] %}
+							<div class="image-container mr-2">
+								<img src="{{ group.vars['value']['group_image'] }}" alt="Group Image" class="img-thumbnail">
 							</div>
 						{% endif %}
 						{{ form_widget(group.group_image) }}
