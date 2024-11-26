@@ -201,6 +201,25 @@
   background-color: #fff;
 }
 
+
+.side-popup-body .quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.side-popup-body .btn-quantity {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.side-popup-body .quantity-input {
+  width: 40px;
+  text-align: center;
+}
+
 .side-popup-footer {
   display: flex;
   justify-content: space-between;

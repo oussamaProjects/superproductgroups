@@ -43,20 +43,20 @@
   <div class="side-popup-footer">
     <button type="button" class="btn btn-secondary js-close-popup">Close</button>
     <button type="button" class="btn btn-primary js-confirm-selection">Confirm</button>
-    </div>
-    </div>
+  </div>
+</div>
 
 
-    <!-- Selected Products Popup -->
-    <div id="selected-products-popup" class="side-popup">
-    <div class="side-popup-header">
+<!-- Selected Products Popup -->
+<div id="selected-products-popup" class="side-popup">
+  <div class="side-popup-header">
     <h5>Produits Sélectionnés</h5>
     <button type="button" class="btn-close js-close-selected-popup" aria-label="Close"></button>
-    </div>
-    <div class="side-popup-body">
+  </div>
+  <div class="side-popup-body">
     <ul id="selected-products-list" class="list-group"></ul>
-    </div>
-    <div class="side-popup-footer">
+  </div>
+  <div class="side-popup-footer">
     <button type="button" class="btn btn-secondary js-close-selected-popup">Close</button>
     <button type="button" class="btn btn-primary js-add-confirmed-selection-to-cart">Add to cart</button>
   </div>

@@ -25,9 +25,22 @@ $(document).ready(function () {
                   </div>
                   <div class="custom-infos" for="product-${product.id}">
                     <div class="custom-label">${product.name}</div>
-                    <div class="custom-price">$${parseFloat(
-                      product.price
-                    ).toFixed(2)}</div>
+                    <div class="custom-price">
+                      $${parseFloat(product.price).toFixed(2)}
+                    </div>
+
+                    <div class="quantity-selector">
+                      <button class="btn-quantity minus" data-product-id="${product.id}">-</button>
+                      <input
+                        type="number"
+                        class="quantity-input"
+                        id="quantity-${product.id}"
+                        value="1"
+                        min="1"
+                      />
+                      <button class="btn-quantity plus" data-product-id="${product.id}">+</button>
+                    </div>
+
                   </div>
                   <input
                       class="custom-input"
@@ -48,6 +61,22 @@ $(document).ready(function () {
     // Show the popup
     $selectedProductsPopup.removeClass("visible");
     $groupPopup.addClass("visible");
+  });
+
+  // Handle quantity changes
+  $groupProductsContainer.on("click", ".btn-quantity", function (e) {
+    e.preventDefault();
+    const button = $(this);
+    const input = button.siblings(".quantity-input").first(); // Find the corresponding input
+    const currentQuantity = parseInt(input.val()) || 1;
+    const isPlus = button.hasClass("plus");
+
+    // Update the quantity
+    if (isPlus) {
+      input.val(currentQuantity + 1);
+    } else if (currentQuantity > 1) {
+      input.val(currentQuantity - 1);
+    }
   });
 
   // Handle product search
