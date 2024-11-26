@@ -1,77 +1,103 @@
-/* General Layout */
+.hidden{
+	display: none;
+}/* General Layout */
 #list-super-product-groups {
-  margin: 20px 0;
-  font-family: 'Arial', sans-serif;
+	margin: 20px 0;
+	font-family: 'Arial', sans-serif;
 }
 
 #list-super-product-groups h3 {
-  font-size: 1.8rem;
-  color: #333;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
+	font-size: 1.8rem;
+	color: #333;
+	font-weight: bold;
+	margin-bottom: 20px;
+	text-align: center;
 }
 
 /* Group Item Styles */
 .list-super-product-groups {
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  padding: 8px 16px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
-  overflow: hidden;
+	margin-bottom: 20px;
+	border: 1px solid #ccc;
+	padding: 8px 16px;
+	border-radius: 10px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	background-color: #fff;
+	overflow: hidden;
 }
 
 .list-super-product-groups li.list-super-product-group-item{
-  border-bottom: 1px solid #ccc;
-  padding: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background-color 0.3s ease;
-  cursor: pointer;
+	border-bottom: 1px solid #ccc;
+	padding: 8px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	transition: background-color 0.3s ease;
+	cursor: pointer;
 }
 
 .list-super-product-groups li.list-super-product-group-item:last-child {
-  border-bottom: none;
+	border-bottom: none;
 }
 
 .list-super-product-groups li.list-super-product-group-item span {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
-  transition: color 0.3s ease;
+	font-size: 1.2rem;
+	font-weight: bold;
+	color: #333;
+	transition: color 0.3s ease;
 }
 
 .list-super-product-groups li.list-super-product-group-item:hover span {
-  color: #007bff;
+	color: #007bff;
 }
 
 .list-super-product-groups li.list-super-product-group-item i {
-  font-size: 1.5rem;
-  color: #333;
-  margin-right: 10px;
+	font-size: 1.5rem;
+	color: #333;
+	margin-right: 10px;
 }
 
+.selected-groups-list{}
+.selected-groups-list .group{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.selected-groups-list .group .group-name{
+	font-size: 16px;
+	font-weight: bold;
+	color: #333;
+}
+.selected-groups-list .group .group-total-price{
+	font-size: 16px;
+	font-weight: bold;
+	color: #333;
+	margin-left: auto;
+	margin-right: 8px;
+}
+.selected-groups-list .group .js-view-selected-products{
+	font-size: 12px;
+	color: #333;
+	cursor: pointer;
+	text-decoration: underline;
+}
 /* Side Popup */
 .side-popup {
-  position: fixed;
-  top: 0;
-  right: -100%;
-  width: 400px;
-  height: 100%;
-  background: #fff;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  overflow-y: auto;
-  transition: right 0.4s ease-in-out;
-  border-left: 2px solid #ddd;
-  padding: 40px;
+	position: fixed;
+	top: 0;
+	right: -100%;
+	width: 400px;
+	height: 100%;
+	background: #fff;
+	box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	overflow-y: auto;
+	transition: right 0.4s ease-in-out;
+	border-left: 2px solid #ddd;
+	padding: 40px;
 }
 
 .side-popup.visible {
-  right: 0;
+	right: 0;
 }
 
 .side-popup-header {
@@ -81,50 +107,50 @@
 }
 
 .side-popup-header .btn-close {
-  cursor: pointer;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 1.5rem;
-  color: #333;
-  transition: color 0.3s ease;
-  border-radius: 50%;
-  height: 30px;
-  width: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	cursor: pointer;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	font-size: 1.5rem;
+	color: #333;
+	transition: color 0.3s ease;
+	border-radius: 50%;
+	height: 30px;
+	width: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .side-popup-search{
-  padding: 12px 0;
+	padding: 12px 0;
 }
 
 .side-popup-search .side-popup-search-controller{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #333;
-  margin-bottom: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	color: #333;
+	margin-bottom: 4px;
 }
 
 .side-popup-search .side-popup-search-controller label{
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #333;
-  margin-right: 10px;
+	margin: 0;
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: #333;
+	margin-right: 10px;
 }
 
 
 .side-popup-search .side-popup-search-controller .group-product-search{
-  border: 1px solid #ccc;
-  outline: none;
-  font-size: 0.9rem;
-  color: #333;
-  width: 160px;
-  height: 26px;
-  border-radius: 16px;
+	border: 1px solid #ccc;
+	outline: none;
+	font-size: 0.9rem;
+	color: #333;
+	width: 160px;
+	height: 26px;
+	border-radius: 16px;
 }
 
 .side-popup-body {
@@ -132,130 +158,130 @@
 
 
 .side-popup-body .custom-check {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border-radius: 5px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  border: 1px solid #ccc;
-  color: #333;
-  background-color: #fff;
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+	border-radius: 5px;
+	padding: 8px 12px;
+	font-size: 0.9rem;
+	border: 1px solid #ccc;
+	color: #333;
+	background-color: #fff;
 }
 
 
 .side-popup-body .custom-image {
-  margin-right: 10px;
-  width: 100px;
-  height: 100px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  cursor: pointer;
+	margin-right: 10px;
+	width: 100px;
+	height: 100px;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid #ccc;
+	background-color: #fff;
+	cursor: pointer;
 }
 
 .side-popup-body .custom-infos {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex: 1;
-  padding-right: 16px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	flex: 1;
+	padding-right: 16px;
 }
 
 .side-popup-body .custom-label {
-  flex: 1;
-  margin: 0;
-  margin-bottom: 8px;
-  color: #333;
-  cursor: pointer;
-  transition: color 0.3s ease;
-  font-size: 12px;
-  line-height: 14px;
+	flex: 1;
+	margin: 0;
+	margin-bottom: 8px;
+	color: #333;
+	cursor: pointer;
+	transition: color 0.3s ease;
+	font-size: 12px;
+	line-height: 14px;
 }
 
 .side-popup-body .custom-price {
-  font-size: 1.1rem;
-  color: #333;
-  margin: 0;
-  cursor: pointer;
-  transition: color 0.3s ease;
-  font-weight: bold;
+	font-size: 1.16px;
+	color: #333;
+	margin: 0;
+	cursor: pointer;
+	transition: color 0.3s ease;
+	font-weight: bold;
 }
 
 .side-popup-body .custom-input {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border-radius: 5px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  border: 1px solid #ccc;
-  color: #333;
-  background-color: #fff;
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+	border-radius: 5px;
+	padding: 8px 12px;
+	font-size: 0.9rem;
+	border: 1px solid #ccc;
+	color: #333;
+	background-color: #fff;
 }
 
 
 .side-popup-body .quantity-selector {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+	display: flex;
+	align-items: center;
+	gap: 5px;
 }
 
 .side-popup-body .btn-quantity {
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  padding: 5px;
-  cursor: pointer;
+	background-color: #f0f0f0;
+	border: 1px solid #ccc;
+	padding: 5px;
+	cursor: pointer;
 }
 
 .side-popup-body .quantity-input {
-  width: 40px;
-  text-align: center;
+	width: 40px;
+	text-align: center;
 }
 
 .side-popup-footer {
-  display: flex;
-  justify-content: space-between;
+	display: flex;
+	justify-content: space-between;
 }
 
 .side-popup-footer .btn {
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+	padding: 8px 12px;
+	font-size: 0.9rem;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
 }
 
 .side-popup-footer .btn-secondary {
-  background-color: #6c757d;
-  color: #fff;
-  border: none;
+	background-color: #6c757d;
+	color: #fff;
+	border: none;
 }
 
 .side-popup-footer .btn-secondary:hover {
-  background-color: #5a6268;
+	background-color: #5a6268;
 }
 
 .side-popup-footer .btn-primary {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
+	background-color: #007bff;
+	color: #fff;
+	border: none;
 }
 
 .side-popup-footer .btn-primary:hover {
-  background-color: #0056b3;
+	background-color: #0056b3;
 }
 
 
 .cart-success-message {
-  font-size: 16px;
-  font-weight: bold;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	font-size: 16px;
+	font-weight: bold;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

@@ -5,6 +5,7 @@ $(document).ready(function () {
   const $productSearchInput = $("#group-product-search");
   const $selectedProductsPopup = $("#selected-products-popup");
   const $selectedProductsList = $("#selected-products-list");
+  const $selectedGroupsList = $(".selected-groups-list");
 
   let selectedProducts = [];
 
@@ -12,6 +13,7 @@ $(document).ready(function () {
   $(".js-open-group-popup").on("click", function (e) {
     e.preventDefault();
     const products = $(this).data("products");
+    const id_group = $(this).data("id_group");
     console.log("products", products);
 
     // Populate the popup with products
@@ -48,6 +50,7 @@ $(document).ready(function () {
                       id="product-${product.id}"
                       value="${product.id}"
                       data-product='${JSON.stringify(product)}'
+                      data-id_group='${id_group}'
                   />
 
               </div>`
@@ -111,12 +114,61 @@ $(document).ready(function () {
 
     console.log("Selected Products:", selectedProducts); // Replace with your logic
 
+    if (selectedProducts.length > 0) {
+      // Group products by their group_id
+      const groupedProducts = selectedProducts.reduce((acc, product) => {
+        if (!acc[product.group_id]) {
+          acc[product.group_id] = {
+            group_name: product.group_name,
+            total_price: 0,
+            products: [],
+          };
+        }
+        acc[product.group_id].total_price += parseFloat(product.price);
+        acc[product.group_id].products.push(product);
+        return acc;
+      }, {});
+
+      // Create HTML for each group
+      const groupedHtml = Object.values(groupedProducts)
+        .map(
+          (group) =>
+            `<div class="group">
+                  <div class="group-name">${group.group_name}</div>
+                  <div class="group-total-price">$${group.total_price.toFixed(
+                    2
+                  )}</div>
+                   <span class="js-view-selected-products">Voir Produits Sélectionnés</span>
+                <div class="hidden group-products">
+                  ${group.products
+                    .map(
+                      (product) =>
+                        `<div class="custom-check">
+                            <div class="custom-infos">
+                              <div class="custom-label">${product.name}</div>
+                              <div class="custom-price">$${parseFloat(
+                                product.price
+                              ).toFixed(2)}</div>
+                            </div>
+                          </div>`
+                    )
+                    .join("")}
+                </div>
+            </div>`
+        )
+        .join("");
+
+      $selectedGroupsList.html(groupedHtml);
+    } else {
+      $selectedGroupsList.html("<p>Aucun produit sélectionné.</p>");
+    }
+
     // Hide the popup
     $groupPopup.removeClass("visible");
   });
 
   // Open the selected products popup
-  $(".js-view-selected-products").on("click", function (e) {
+  $(document).on("click", ".js-view-selected-products", function (e) {
     e.preventDefault();
     console.log("selectedProducts", selectedProducts);
 

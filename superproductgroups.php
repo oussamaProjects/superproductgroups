@@ -292,6 +292,9 @@ class SuperProductGroups extends Module
 
         $groups[$row['id_group']]['products'][] = [
           'id' => $row['product_id'],
+          'id_group' => $row['id_group'],
+          'group_name' => $row['group_name'],
+          'group_image' => $row['group_image'],
           'name' => $row['product_name'],
           'price' => number_format((float)$row['product_price'], 2, '.', ''), // Format price to 2 decimals
           'image' => $imageUrl,
