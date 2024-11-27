@@ -177,6 +177,7 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 		*/
 	public function saveGroupProducts(Request $request): JsonResponse
 	{
+
 		$groupId = (int) $request->request->get('groupId');
 		$productIds = $request->request->get('productIds', []);
 
@@ -188,7 +189,7 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
 		try {
 
-			$db->delete('product_group_relationship', 'id_group = ' . (int)$groupId);
+			// $db->delete('product_group_relationship', 'id_group = ' . (int)$groupId);
 			if (!empty($productIds)) {
 				foreach ($productIds as $productId) {
 					$db->insert('product_group_relationship', [

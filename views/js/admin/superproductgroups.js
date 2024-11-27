@@ -334,6 +334,8 @@ console.log("index", index);
 
         alert(response.message);
         $("#product-popup").removeClass("visible"); // Close the popup
+        window.location.reload();
+
       },
       error: function (xhr) {
         alert("Erreur lors de l'enregistrement des produits.");
