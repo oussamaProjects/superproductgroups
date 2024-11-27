@@ -94,6 +94,8 @@
 	transition: right 0.4s ease-in-out;
 	border-left: 2px solid #ddd;
 	padding: 40px;
+  display: flex;
+  flex-direction: column;
 }
 
 .side-popup.visible {
@@ -205,7 +207,7 @@
 }
 
 .side-popup-body .custom-price {
-	font-size: 1.16px;
+	font-size: 14px;
 	color: #333;
 	margin: 0;
 	cursor: pointer;
@@ -245,7 +247,9 @@
 	width: 40px;
 	text-align: center;
 }
-
+.side-popup-after-body{
+  margin-top: auto;
+}
 .side-popup-footer {
 	display: flex;
 	justify-content: space-between;

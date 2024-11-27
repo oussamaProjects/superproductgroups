@@ -8,6 +8,7 @@ $(document).ready(function () {
   const $selectedGroupsList = $(".selected-groups-list");
 
   let selectedProducts = [];
+  let groupedProducts = [];
 
   // Open side popup and populate products
   $(".js-open-group-popup").on("click", function (e) {
@@ -32,7 +33,9 @@ $(document).ready(function () {
                     </div>
 
                     <div class="quantity-selector">
-                      <button class="btn-quantity minus" data-product-id="${product.id}">-</button>
+                      <button class="btn-quantity minus" data-product-id="${
+                        product.id
+                      }">-</button>
                       <input
                         type="number"
                         class="quantity-input"
@@ -40,7 +43,9 @@ $(document).ready(function () {
                         value="1"
                         min="1"
                       />
-                      <button class="btn-quantity plus" data-product-id="${product.id}">+</button>
+                      <button class="btn-quantity plus" data-product-id="${
+                        product.id
+                      }">+</button>
                     </div>
 
                   </div>
@@ -105,29 +110,38 @@ $(document).ready(function () {
 
   // Handle confirmation of selected products
   $(".js-confirm-selection").on("click", function () {
-    selectedProducts = $groupProductsContainer
+
+    const newlySelectedProducts = $groupProductsContainer
       .find("input:checked")
       .map(function () {
         return $(this).data("product");
       })
       .get();
 
+    // Add new products without replacing existing ones
+    newlySelectedProducts.forEach((product) => {
+      if (!selectedProducts.some((p) => p.id === product.id)) {
+        selectedProducts.push(product);
+      }
+    });
+
     console.log("Selected Products:", selectedProducts); // Replace with your logic
 
     if (selectedProducts.length > 0) {
-      // Group products by their group_id
-      const groupedProducts = selectedProducts.reduce((acc, product) => {
-        if (!acc[product.group_id]) {
-          acc[product.group_id] = {
+      // Group products by their id_group
+       groupedProducts = selectedProducts.reduce((acc, product) => {
+        if (!acc[product.id_group]) {
+          acc[product.id_group] = {
             group_name: product.group_name,
             total_price: 0,
             products: [],
           };
         }
-        acc[product.group_id].total_price += parseFloat(product.price);
-        acc[product.group_id].products.push(product);
+        acc[product.id_group].total_price += parseFloat(product.price);
+        acc[product.id_group].products.push(product);
         return acc;
       }, {});
+
 
       // Create HTML for each group
       const groupedHtml = Object.values(groupedProducts)
@@ -170,23 +184,31 @@ $(document).ready(function () {
   // Open the selected products popup
   $(document).on("click", ".js-view-selected-products", function (e) {
     e.preventDefault();
-    console.log("selectedProducts", selectedProducts);
 
-    if (selectedProducts.length > 0) {
-      const selectedHtml = selectedProducts
+    console.log("Selected Groups:", Object.values(groupedProducts)); // Replace with your logic
+
+    if (groupedProducts) {
+      const selectedHtml = Object.values(groupedProducts)
         .map(
-          (product) =>
-            `<div class="custom-check">
-                  <div class="custom-image">
-                    <img src="${product.image}" alt="${product.name}">
-                  </div>
-                  <div class="custom-infos" for="product-${product.id}">
-                    <div class="custom-label">${product.name}</div>
-                    <div class="custom-price">$${parseFloat(
-                      product.price
-                    ).toFixed(2)}</div>
-                  </div>
-              </div>`
+          (group) =>
+            `<div class="group">
+                <div class="group-name">${group.group_name}</div>
+                <div class="group-products">
+                  ${group.products
+                    .map(
+                      (product) =>
+                        `<div class="product">
+                            <div class="product-infos">
+                              <div class="product-label">${product.name}</div>
+                              <div class="product-price">$${parseFloat(
+                                product.price
+                              ).toFixed(2)}</div>
+                            </div>
+                          </div>`
+                    )
+                    .join("")}
+                </div>
+            </div>`
         )
         .join("");
       $selectedProductsList.html(selectedHtml);
@@ -267,8 +289,7 @@ $(document).ready(function () {
           $(this).remove(); // Remove the message after fading out
         });
 
-
-        window.location.reload();
+      window.location.reload();
 
       // Hide the popup
       $selectedProductsPopup.removeClass("visible");
