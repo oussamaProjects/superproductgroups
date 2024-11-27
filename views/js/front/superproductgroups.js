@@ -22,41 +22,40 @@ $(document).ready(function () {
       const productsHtml = products
         .map(
           (product) =>
-            `<div class="custom-check">
-              <div class="custom-image">
+            `<div class="custom-product">
+              <div class="product-image">
                 <img src="${product.image}" alt="${product.name}">
               </div>
-              <div class="custom-infos" for="product-${product.id}">
+              <div class="product-infos" for="product-${product.id}">
 
-                <div class="custom-label">${product.name}</div>
-                <div class="custom-price">
+                <div class="product-actions-container">
+                  <div class="product-actions">
+                    <div class="quantity-selector">
+                      <button class="btn-quantity minus" data-product-id="${product.id}">-</button>
+                      <input type="number" class="quantity-input" id="quantity-${product.id}" value="1" min="1" />
+                      <button class="btn-quantity plus" data-product-id="${product.id}">+</button>
+                    </div>
+                  </div>
+                  <input
+                      class="product-input"
+                      type="checkbox"
+                      id="product-${product.id}"
+                      value="${product.id}"
+                      data-product='${JSON.stringify({
+                        ...product,
+                        quantity: 1,
+                      })}'
+                      data-id_group='${id_group}'
+                  />
+                </div>
+
+                <div class="product-label">${product.name}</div>
+                <div class="product-price">
                   $${parseFloat(product.price).toFixed(2)}
                 </div>
 
-                <div class="quantity-selector">
-                  <button class="btn-quantity minus" data-product-id="${
-                    product.id
-                  }">-</button>
-                  <input type="number" class="quantity-input" id="quantity-${
-                    product.id
-                  }" value="1" min="1"/>
-                  <button class="btn-quantity plus" data-product-id="${
-                    product.id
-                  }">+</button>
-                </div>
-
               </div>
-              <input
-                  class="custom-input"
-                  type="checkbox"
-                  id="product-${product.id}"
-                  value="${product.id}"
-                  data-product='${JSON.stringify({
-                    ...product,
-                    quantity: 1,
-                  })}'
-                  data-id_group='${id_group}'
-              />
+
             </div>`
         )
         .join("");
@@ -94,14 +93,14 @@ $(document).ready(function () {
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
     $(`#product-${productId}`)
-      .closest(".custom-check")
-      .find(".custom-price")
+      .closest(".custom-product")
+      .find(".product-price")
       .text(`$${totalPrice.toFixed(2)}`);
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
 
-  // Optional: Update data-product and custom-price when manually editing input field
+  // Optional: Update data-product and product-price when manually editing input field
   $groupProductsContainer.on("change", ".quantity-input", function () {
     const input = $(this);
     const newQuantity = Math.max(parseInt(input.val()) || 1, 1); // Ensure valid quantity
@@ -115,8 +114,8 @@ $(document).ready(function () {
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
     $(`#product-${productId}`)
-      .closest(".custom-check")
-      .find(".custom-price")
+      .closest(".custom-product")
+      .find(".product-price")
       .text(`$${totalPrice.toFixed(2)}`);
 
     checkbox.attr("data-product", JSON.stringify(productData));
@@ -125,14 +124,14 @@ $(document).ready(function () {
   // Handle product search
   $productSearchInput.on("input", function () {
     const searchQuery = $(this).val().toLowerCase();
-    const $productItems = $groupProductsContainer.find(".custom-label");
+    const $productItems = $groupProductsContainer.find(".product-label");
     console.log("$productItems", $productItems);
 
     $productItems.each(function () {
-      const $item = $(this).closest(".custom-check");
+      const $item = $(this).closest(".custom-product");
       console.log("$item", $item);
 
-      const productName = $item.find(".custom-label").text().toLowerCase();
+      const productName = $item.find(".product-label").text().toLowerCase();
 
       // Show/hide based on the search query
       if (productName.includes(searchQuery)) {
@@ -225,32 +224,43 @@ $(document).ready(function () {
     console.log("Selected Groups:", Object.values(groupedProducts)); // Replace with your logic
 
     if (groupedProducts) {
-      const selectedHtml = Object.values(groupedProducts)
-        .map(
+
+      const selectedHtml = Object.values(groupedProducts).map(
           (group) =>
             `<div class="group">
+                <!-- Group Name -->
                 <div class="group-name">${group.group_name}</div>
                 <div class="group-products">
+                  <!-- Products within the group -->
                   ${group.products
                     .map(
                       (product) =>
                         `<div class="product">
-                            <div class="product-infos">
-                              <div class="product-quantity">${
-                                product.quantity
-                              }</div>
-                              <div class="product-label">${product.name}</div>
-                              <div class="product-price">$${parseFloat(
-                                product.price * product.quantity
-                              ).toFixed(2)}</div>
+
+                          <!-- Product Information -->
+                          <div class="product-infos">
+                            <div class="product-quantity">${product.quantity}</div>
+                            <div class="product-label">${product.name} (Code: ${product.code || "N/A"})</div>
+                            <div class="product-price">$${parseFloat(product.price * product.quantity).toFixed(2)}</div>
+                          </div>
+
+                          <!-- Product Actions -->
+                          <div class="product-actions">
+                            <div class="quantity-selector">
+                              <button class="btn-quantity minus" data-product-id="${product.id}">-</button>
+                              <input type="number" class="quantity-input" id="quantity-${product.id}" value="${product.quantity}" min="1" />
+                              <button class="btn-quantity plus" data-product-id="${product.id}">+</button>
                             </div>
-                          </div>`
+                          </div>
+
+                        </div>`
                     )
                     .join("")}
                 </div>
             </div>`
         )
         .join("");
+
       $selectedProductsList.html(selectedHtml);
     } else {
       $selectedProductsList.html("<p>Aucun produit sélectionné.</p>");
