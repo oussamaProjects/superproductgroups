@@ -23,42 +23,41 @@ $(document).ready(function () {
         .map(
           (product) =>
             `<div class="custom-check">
-                  <div class="custom-image">
-                    <img src="${product.image}" alt="${product.name}">
-                  </div>
-                  <div class="custom-infos" for="product-${product.id}">
-                    <div class="custom-label">${product.name}</div>
-                    <div class="custom-price">
-                      $${parseFloat(product.price).toFixed(2)}
-                    </div>
+              <div class="custom-image">
+                <img src="${product.image}" alt="${product.name}">
+              </div>
+              <div class="custom-infos" for="product-${product.id}">
 
-                    <div class="quantity-selector">
-                      <button class="btn-quantity minus" data-product-id="${
-                        product.id
-                      }">-</button>
-                      <input
-                        type="number"
-                        class="quantity-input"
-                        id="quantity-${product.id}"
-                        value="1"
-                        min="1"
-                      />
-                      <button class="btn-quantity plus" data-product-id="${
-                        product.id
-                      }">+</button>
-                    </div>
+                <div class="custom-label">${product.name}</div>
+                <div class="custom-price">
+                  $${parseFloat(product.price).toFixed(2)}
+                </div>
 
-                  </div>
-                  <input
-                      class="custom-input"
-                      type="checkbox"
-                      id="product-${product.id}"
-                      value="${product.id}"
-                      data-product='${JSON.stringify(product)}'
-                      data-id_group='${id_group}'
-                  />
+                <div class="quantity-selector">
+                  <button class="btn-quantity minus" data-product-id="${
+                    product.id
+                  }">-</button>
+                  <input type="number" class="quantity-input" id="quantity-${
+                    product.id
+                  }" value="1" min="1"/>
+                  <button class="btn-quantity plus" data-product-id="${
+                    product.id
+                  }">+</button>
+                </div>
 
-              </div>`
+              </div>
+              <input
+                  class="custom-input"
+                  type="checkbox"
+                  id="product-${product.id}"
+                  value="${product.id}"
+                  data-product='${JSON.stringify({
+                    ...product,
+                    quantity: 1,
+                  })}'
+                  data-id_group='${id_group}'
+              />
+            </div>`
         )
         .join("");
       $groupProductsContainer.html(productsHtml);
@@ -71,20 +70,56 @@ $(document).ready(function () {
     $groupPopup.addClass("visible");
   });
 
-  // Handle quantity changes
+  // Update quantity in data-product dynamically
   $groupProductsContainer.on("click", ".btn-quantity", function (e) {
     e.preventDefault();
     const button = $(this);
-    const input = button.siblings(".quantity-input").first(); // Find the corresponding input
+    const input = button.siblings(".quantity-input");
+    const productId = button.data("product-id");
     const currentQuantity = parseInt(input.val()) || 1;
-    const isPlus = button.hasClass("plus");
 
-    // Update the quantity
-    if (isPlus) {
-      input.val(currentQuantity + 1);
-    } else if (currentQuantity > 1) {
-      input.val(currentQuantity - 1);
-    }
+    // Determine if it's a "plus" or "minus" button
+    const newQuantity = button.hasClass("plus")
+      ? currentQuantity + 1
+      : Math.max(currentQuantity - 1, 1); // Ensure quantity is at least 1
+
+    // Update the input field
+    input.val(newQuantity);
+
+    // Update the data-product attribute
+    const checkbox = $(`#product-${productId}`);
+    const productData = JSON.parse(checkbox.attr("data-product"));
+    productData.quantity = newQuantity;
+
+    // Update the total price
+    const totalPrice = parseFloat(productData.price) * newQuantity;
+    $(`#product-${productId}`)
+      .closest(".custom-check")
+      .find(".custom-price")
+      .text(`$${totalPrice.toFixed(2)}`);
+
+    checkbox.attr("data-product", JSON.stringify(productData));
+  });
+
+  // Optional: Update data-product and custom-price when manually editing input field
+  $groupProductsContainer.on("change", ".quantity-input", function () {
+    const input = $(this);
+    const newQuantity = Math.max(parseInt(input.val()) || 1, 1); // Ensure valid quantity
+    input.val(newQuantity); // Correct the value if invalid
+
+    const productId = input.attr("id").split("-")[1];
+    const checkbox = $(`#product-${productId}`);
+    const productData = JSON.parse(checkbox.attr("data-product"));
+    productData.quantity = newQuantity;
+
+    // Update the total price
+    const totalPrice = parseFloat(productData.price) * newQuantity;
+    $(`#product-${productId}`)
+      .closest(".custom-check")
+      .find(".custom-price")
+      .text(`$${totalPrice.toFixed(2)}`);
+
+    checkbox.attr("data-product", JSON.stringify(productData));
   });
 
   // Handle product search
@@ -110,7 +145,6 @@ $(document).ready(function () {
 
   // Handle confirmation of selected products
   $(".js-confirm-selection").on("click", function () {
-
     const newlySelectedProducts = $groupProductsContainer
       .find("input:checked")
       .map(function () {
@@ -129,7 +163,7 @@ $(document).ready(function () {
 
     if (selectedProducts.length > 0) {
       // Group products by their id_group
-       groupedProducts = selectedProducts.reduce((acc, product) => {
+      groupedProducts = selectedProducts.reduce((acc, product) => {
         if (!acc[product.id_group]) {
           acc[product.id_group] = {
             group_name: product.group_name,
@@ -137,11 +171,11 @@ $(document).ready(function () {
             products: [],
           };
         }
-        acc[product.id_group].total_price += parseFloat(product.price);
+        acc[product.id_group].total_price +=
+          parseFloat(product.price) * product.quantity;
         acc[product.id_group].products.push(product);
         return acc;
       }, {});
-
 
       // Create HTML for each group
       const groupedHtml = Object.values(groupedProducts)
@@ -157,11 +191,14 @@ $(document).ready(function () {
                   ${group.products
                     .map(
                       (product) =>
-                        `<div class="custom-check">
-                            <div class="custom-infos">
-                              <div class="custom-label">${product.name}</div>
-                              <div class="custom-price">$${parseFloat(
-                                product.price
+                        `<div class="product-check">
+                            <div class="product-infos">
+                              <div class="product-quantity">${
+                                product.quantity
+                              }</div>
+                              <div class="product-label">${product.name}</div>
+                              <div class="product-price">$${parseFloat(
+                                product.price * product.quantity
                               ).toFixed(2)}</div>
                             </div>
                           </div>`
@@ -199,9 +236,12 @@ $(document).ready(function () {
                       (product) =>
                         `<div class="product">
                             <div class="product-infos">
+                              <div class="product-quantity">${
+                                product.quantity
+                              }</div>
                               <div class="product-label">${product.name}</div>
                               <div class="product-price">$${parseFloat(
-                                product.price
+                                product.price * product.quantity
                               ).toFixed(2)}</div>
                             </div>
                           </div>`
@@ -241,7 +281,7 @@ $(document).ready(function () {
           id_product: product.id,
           id_customization: 0, // If customization is not required
           id_product_attribute: 0, // If no specific attribute is selected
-          qty: 1, // Adjust quantity as needed
+          qty: product.quantity, // Adjust quantity as needed
         },
         success: function () {
           console.log(`Product ${product.name} added to cart successfully.`);
