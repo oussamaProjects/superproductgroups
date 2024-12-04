@@ -235,7 +235,7 @@ $(document).ready(function () {
                   ${group.products
                     .map(
                       (product) =>
-                        `<div class="product">
+                        `<div id="selected-product-${product.id}" class="product" data-product='${JSON.stringify(product)}'>
 
                           <!-- Product Information -->
                           <div class="product-infos">
@@ -269,6 +269,50 @@ $(document).ready(function () {
     $groupPopup.removeClass("visible");
     $selectedProductsPopup.addClass("visible");
   });
+
+
+  $selectedProductsPopup.on("click", ".btn-quantity", function (e) {
+    e.preventDefault();
+    const button = $(this);
+    const input = button.siblings(".quantity-input");
+    const productId = button.data("product-id");
+    const currentQuantity = parseInt(input.val()) || 1;
+
+    // Determine if it's a "plus" or "minus" button
+    const newQuantity = button.hasClass("plus")
+      ? currentQuantity + 1
+      : Math.max(currentQuantity - 1, 1); // Ensure quantity is at least 1
+
+    // Update the input field
+    input.val(newQuantity);
+console.log("productId", productId);
+
+    // Find the product in the `selectedProducts` array and update its quantity
+    const productIndex = selectedProducts.findIndex(p => p.id == productId);
+    console.log("productIndex", productIndex);
+
+    if (productIndex !== -1) {
+        selectedProducts[productIndex].quantity = newQuantity;
+
+        // Optionally, update the total price in the `selectedProducts` array
+        selectedProducts[productIndex].totalPrice = parseFloat(selectedProducts[productIndex].price) * newQuantity;
+    }
+
+    // Update the data-product attribute
+    const selectedProduct = $(`#selected-product-${productId}`);
+    const productData = JSON.parse(selectedProduct.attr("data-product"));
+    productData.quantity = newQuantity;
+
+    // Update the total price
+    const totalPrice = parseFloat(productData.price) * newQuantity;
+    $(`#selected-product-${productId}`).find(".product-quantity").text(newQuantity);
+    $(`#selected-product-${productId}`).find(".product-price").text(`$${totalPrice.toFixed(2)}`);
+
+    selectedProduct.attr("data-product", JSON.stringify(productData));
+    console.log("Updated selectedProducts:", selectedProducts); // Debugging output
+
+  });
+
 
   // Handle confirmation of selected products
   $(".js-add-confirmed-selection-to-cart").on("click", function () {

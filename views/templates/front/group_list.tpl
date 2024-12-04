@@ -30,10 +30,10 @@
     </div>
 
     <div class="side-popup-search">
-      <div class="side-popup-search-controller">
+      {* <div class="side-popup-search-controller">
         <label>Numéro : </label>
         <input type="text" id="group-product-search-num" class="group-product-search form-control" />
-      </div>
+      </div> *}
 
       <div class="side-popup-search-controller">
         <label>Mot clé : </label>
@@ -51,8 +51,8 @@
     </div>
 
     <div class="side-popup-footer">
-      <button type="button" class="btn btn-secondary js-close-popup">Close</button>
-      <button type="button" class="btn btn-primary js-confirm-selection">Confirm</button>
+      {* <button type="button" class="btn btn-secondary js-close-popup">Close</button> *}
+      <button type="button" class="btn btn-primary js-confirm-selection">Voir ma séléction</button>
     </div>
 
   </div>
@@ -76,8 +76,8 @@
     </div>
 
     <div class="side-popup-footer">
-      <button type="button" class="btn btn-secondary js-close-selected-popup">Close</button>
-      <button type="button" class="btn btn-primary js-add-confirmed-selection-to-cart">Add to cart</button>
+      {* <button type="button" class="btn btn-secondary js-close-selected-popup">Close</button> *}
+      <button type="button" class="btn btn-primary js-add-confirmed-selection-to-cart">Validé ma séléction</button>
     </div>
 
   </div>
