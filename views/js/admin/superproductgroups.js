@@ -1,6 +1,6 @@
 $(document).ready(function () {
   let index = $("#group-rows .group-entry").length; // Initial index for new rows
-console.log("index", index);
+  console.log("index", index);
 
   // Add new row dynamically
   $("#add-row").on("click", function () {
@@ -150,6 +150,22 @@ console.log("index", index);
   const $productList = $("#product-list");
   let currentGroupId = null;
 
+  // Make the product list sortable
+  $productList.sortable({
+    placeholder: "sortable-placeholder",
+    update: function (event, ui) {
+      updateProductOrder();
+    },
+  });
+
+  function updateProductOrder() {
+    $("#product-list .list-group-item").each(function (index) {
+      const $item = $(this);
+      $item.find(".product-order").text(index + 1); // Update the product order display
+      $item.data("product-order", index + 1); // Optionally update an order attribute
+    });
+  }
+
   // Open product popup for the selected group
   $(".js-open-product-popup").on("click", function () {
     currentGroupId = $(this).data("group-id");
@@ -194,13 +210,20 @@ console.log("index", index);
         console.log("Fetched products:", response.products);
         const productsHtml = response.products
           .map(
-            (product) => `
-
-            <li class="list-group-item d-flex align-items-center" data-id_group="${currentGroupId}">
-              <span class="product-order">01</span>
-              <span class="product-info">
-              ${product.name}</span>
-              <button class="btn btn-danger btn-sm ms-auto js-delete-product" data-id_product="${product.id_product}" data-id_group="${currentGroupId}">Supprimer</button>
+            (product, index) => `
+            <li class="list-group-item d-flex align-items-center" data-product-order="${
+              index + 1
+            }" data-id_group="${currentGroupId}" data-id_product="${
+              product.id_product
+            }">
+              <span class="sort-icon me-2" style="cursor: move;margin-right: 8px;">
+                <i class="fas fa-sort"></i> <!-- Drag/Sort icon -->
+              </span>
+              <span class="product-order">${index + 1}</span>
+              <span class="product-info">${product.name}</span>
+              <button class="btn btn-danger btn-sm ms-auto js-delete-product" data-id_group="${currentGroupId}" data-id_product="${
+              product.id_product
+            }">Supprimer</button>
             </li>`
           )
           .join("");
@@ -282,12 +305,18 @@ console.log("index", index);
         return;
       }
 
+      // Calculate the next product order
+      const nextOrder = $productList.children().length + 1;
+
       // Add product to the list
       const newProductHtml = `
-           <li class="list-group-item d-flex align-items-center" data-product-id="${selectedProductId}" data-id_group="${currentGroupId}">
-              <span class="product-order">01</span>
+           <li class="list-group-item d-flex align-items-center" data-product-order="0" data-id_group="${currentGroupId}" data-id_product="${selectedProductId}">
+              <span class="sort-icon me-2" style="cursor: move;margin-right: 8px;">
+                <i class="fas fa-sort"></i> <!-- Drag/Sort icon -->
+              </span>
+              <span class="product-order">${nextOrder}</span>
               <span class="product-info">	${selectedProductName}</span>
-              <button class="btn btn-danger btn-sm ms-auto js-delete-product" data-id_product="${selectedProductId}" data-id_group="${currentGroupId}" >Supprimer</button>
+              <button class="btn btn-danger btn-sm ms-auto js-delete-product" data-id_group="${currentGroupId}" data-id_product="${selectedProductId}">Supprimer</button>
             </li>`;
       $productList.append(newProductHtml);
 
@@ -308,9 +337,12 @@ console.log("index", index);
   // Handle Save Products Button Click
   $saveProductsButton.on("click", function () {
     const selectedProducts = $productList
-      .find("li")
+      .find(".list-group-item")
       .map(function () {
-        return $(this).data("product-id");
+        return {
+          id: $(this).data("id_product"),
+          order: $(this).data("product-order") || 0, // Include order information
+        };
       })
       .get();
 
@@ -325,7 +357,8 @@ console.log("index", index);
       type: "POST",
       data: {
         groupId: currentGroupId, // Pass the group ID (store it when opening the popup)
-        productIds: selectedProducts,
+        // productIds: selectedProducts,
+        products: selectedProducts, // Pass the product IDs and their order
         // _token: adminToken, // CSRF token for security
       },
 
@@ -335,7 +368,6 @@ console.log("index", index);
         alert(response.message);
         $("#product-popup").removeClass("visible"); // Close the popup
         window.location.reload();
-
       },
       error: function (xhr) {
         alert("Erreur lors de l'enregistrement des produits.");

@@ -71,6 +71,8 @@ class SuperProductGroups extends Module
 
   public function hookActionAdminControllerSetMedia()
   {
+    $this->context->controller->addCSS('https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css');
+    $this->context->controller->addCSS('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
     $this->context->controller->addCSS('https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css');
 
     // Add your custom JS and CSS files
@@ -81,6 +83,7 @@ class SuperProductGroups extends Module
   public function hookActionFrontControllerSetMedia()
   {
 
+    $this->context->controller->addJS('https://code.jquery.com/ui/1.13.2/jquery-ui.min.js');
     // Add your custom JS and CSS files
     $this->context->controller->addJS($this->_path . 'views/js/front/superproductgroups.js');
     $this->context->controller->addCSS($this->_path . 'views/css/front/superproductgroups.css');

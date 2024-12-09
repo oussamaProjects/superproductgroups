@@ -158,3 +158,10 @@
 #autocomplete-dropdown .dropdown-item:hover {
 	background-color: #f0f0f0;
 }
+
+.sortable-placeholder {
+  background: #f0f0f0;
+  border: 2px dashed #ccc;
+  height: 40px; /* Adjust based on your item height */
+  margin-bottom: 10px;
+}

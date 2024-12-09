@@ -179,9 +179,9 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 	{
 
 		$groupId = (int) $request->request->get('groupId');
-		$productIds = $request->request->get('productIds', []);
+		$products = $request->request->get('products', []);
 
-		if (!$groupId || !is_array($productIds)) {
+		if (!$groupId || !is_array($products)) {
 			return new JsonResponse(['status' => 'error', 'message' => 'Invalid group or products'], 400);
 		}
 
@@ -189,15 +189,21 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
 		try {
 
-			// $db->delete('product_group_relationship', 'id_group = ' . (int)$groupId);
-			if (!empty($productIds)) {
-				foreach ($productIds as $productId) {
-					$db->insert('product_group_relationship', [
-						'id_group' => $groupId,
-						'id_product' => (int)$productId,
-					]);
-				}
-			}
+			// Delete existing relationships for the group to ensure clean data
+      $db->delete('product_group_relationship', 'id_group = ' . (int) $groupId);
+
+      // Insert the new products with their order
+      foreach ($products as $product) {
+          if (!isset($product['id']) || !isset($product['order'])) {
+              continue; // Skip invalid product data
+          }
+
+          $db->insert('product_group_relationship', [
+              'id_group' => $groupId,
+              'id_product' => (int) $product['id'],
+              'product_order' => (int) $product['order'], // Save the order
+          ]);
+      }
 
 			return new JsonResponse(['status' => 'success', 'message' => 'Products saved successfully']);
 		} catch (\Exception $e) {
@@ -312,7 +318,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 			->where('pgr.id_product IS NULL') // Exclude products already in groups
 			->where('pl.name LIKE "%' . pSQL($search) . '%"') // Match the search query
 			->where('pl.id_lang = ' . $languageId) // Filter by the current language
-			->groupBy('pl.id_product'); // Ensure no duplicate rows for the same product
+			->groupBy('pl.id_product') // Ensure no duplicate rows for the same product
+      ->orderBy('pgr.product_order ASC');
 
 		// Execute the query and fetch the results
 		$products = \Db::getInstance()->executeS($sql);
@@ -345,6 +352,7 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 		$sql->innerJoin('product_shop', 'ps', 'ps.id_product = p.id_product');
 		$sql->where('pgr.id_group = ' . (int) $groupId);
 		$sql->where('pl.id_lang = ' . (int) \Context::getContext()->language->id);
+    $sql->orderBy('pgr.product_order ASC');
 
 		$products = \Db::getInstance()->executeS($sql);
 
@@ -378,6 +386,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 			$sql->innerJoin('product', 'p', 'pl.id_product = p.id_product');
 			$sql->where('pgr.id_group = ' . (int)$groupId);
 			$sql->where('pl.id_lang = ' . (int)\Context::getContext()->language->id);
+      $sql->orderBy('pgr.product_order ASC');
+
 
 			$products = $db->executeS($sql);
 

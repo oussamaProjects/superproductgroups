@@ -31,9 +31,15 @@ $(document).ready(function () {
                 <div class="product-actions-container">
                   <div class="product-actions">
                     <div class="quantity-selector">
-                      <button class="btn-quantity minus" data-product-id="${product.id}">-</button>
-                      <input type="number" class="quantity-input" id="quantity-${product.id}" value="1" min="1" />
-                      <button class="btn-quantity plus" data-product-id="${product.id}">+</button>
+                      <button class="btn-quantity minus" data-product-id="${
+                        product.id
+                      }">-</button>
+                      <input type="number" class="quantity-input" id="quantity-${
+                        product.id
+                      }" value="1" min="1" />
+                      <button class="btn-quantity plus" data-product-id="${
+                        product.id
+                      }">+</button>
                     </div>
                   </div>
                   <input
@@ -224,8 +230,8 @@ $(document).ready(function () {
     console.log("Selected Groups:", Object.values(groupedProducts)); // Replace with your logic
 
     if (groupedProducts) {
-
-      const selectedHtml = Object.values(groupedProducts).map(
+      const selectedHtml = Object.values(groupedProducts)
+        .map(
           (group) =>
             `<div class="group">
                 <!-- Group Name -->
@@ -235,21 +241,37 @@ $(document).ready(function () {
                   ${group.products
                     .map(
                       (product) =>
-                        `<div id="selected-product-${product.id}" class="product" data-product='${JSON.stringify(product)}'>
+                        `<div id="selected-product-${
+                          product.id
+                        }" class="product" data-product='${JSON.stringify(
+                          product
+                        )}'>
 
                           <!-- Product Information -->
                           <div class="product-infos">
-                            <div class="product-quantity">${product.quantity}</div>
-                            <div class="product-label">${product.name} (Code: ${product.code || "N/A"})</div>
-                            <div class="product-price">$${parseFloat(product.price * product.quantity).toFixed(2)}</div>
+                            <div class="product-quantity">${
+                              product.quantity
+                            }</div>
+                            <div class="product-label">${product.name} (Code: ${
+                          product.code || "N/A"
+                        })</div>
+                            <div class="product-price">$${parseFloat(
+                              product.price * product.quantity
+                            ).toFixed(2)}</div>
                           </div>
 
                           <!-- Product Actions -->
                           <div class="product-actions">
                             <div class="quantity-selector">
-                              <button class="btn-quantity minus" data-product-id="${product.id}">-</button>
-                              <input type="number" class="quantity-input" id="quantity-${product.id}" value="${product.quantity}" min="1" />
-                              <button class="btn-quantity plus" data-product-id="${product.id}">+</button>
+                              <button class="btn-quantity minus" data-product-id="${
+                                product.id
+                              }">-</button>
+                              <input type="number" class="quantity-input" id="quantity-${
+                                product.id
+                              }" value="${product.quantity}" min="1" />
+                              <button class="btn-quantity plus" data-product-id="${
+                                product.id
+                              }">+</button>
                             </div>
                           </div>
 
@@ -270,7 +292,6 @@ $(document).ready(function () {
     $selectedProductsPopup.addClass("visible");
   });
 
-
   $selectedProductsPopup.on("click", ".btn-quantity", function (e) {
     e.preventDefault();
     const button = $(this);
@@ -285,17 +306,18 @@ $(document).ready(function () {
 
     // Update the input field
     input.val(newQuantity);
-console.log("productId", productId);
+    console.log("productId", productId);
 
     // Find the product in the `selectedProducts` array and update its quantity
-    const productIndex = selectedProducts.findIndex(p => p.id == productId);
+    const productIndex = selectedProducts.findIndex((p) => p.id == productId);
     console.log("productIndex", productIndex);
 
     if (productIndex !== -1) {
-        selectedProducts[productIndex].quantity = newQuantity;
+      selectedProducts[productIndex].quantity = newQuantity;
 
-        // Optionally, update the total price in the `selectedProducts` array
-        selectedProducts[productIndex].totalPrice = parseFloat(selectedProducts[productIndex].price) * newQuantity;
+      // Optionally, update the total price in the `selectedProducts` array
+      selectedProducts[productIndex].totalPrice =
+        parseFloat(selectedProducts[productIndex].price) * newQuantity;
     }
 
     // Update the data-product attribute
@@ -305,14 +327,16 @@ console.log("productId", productId);
 
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
-    $(`#selected-product-${productId}`).find(".product-quantity").text(newQuantity);
-    $(`#selected-product-${productId}`).find(".product-price").text(`$${totalPrice.toFixed(2)}`);
+    $(`#selected-product-${productId}`)
+      .find(".product-quantity")
+      .text(newQuantity);
+    $(`#selected-product-${productId}`)
+      .find(".product-price")
+      .text(`$${totalPrice.toFixed(2)}`);
 
     selectedProduct.attr("data-product", JSON.stringify(productData));
     console.log("Updated selectedProducts:", selectedProducts); // Debugging output
-
   });
-
 
   // Handle confirmation of selected products
   $(".js-add-confirmed-selection-to-cart").on("click", function () {
