@@ -324,15 +324,17 @@ class SuperProductGroups extends Module
 
   public function hookDisplayProductAdditionalInfo($params)
   {
+    $logged = $this->context->customer->isLogged();
     // Retrieve product ID from parameters
     $productId = (int)$params['product']['id_product'];
-
     // Fetch groups associated with this product
     $groups = $this->getThisProductGroupsWithProducts($productId);
 
     // Assign data to the template
     $this->context->smarty->assign([
+      'product' => $params['product'],
       'groups' => $groups,
+      'logged' => $logged,
       'ajax_url' => $this->context->link->getModuleLink($this->name, 'ajax', []), // AJAX endpoint for fetching group details
     ]);
 

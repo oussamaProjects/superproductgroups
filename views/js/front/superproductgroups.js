@@ -15,7 +15,10 @@ $(document).ready(function () {
     e.preventDefault();
     const products = $(this).data("products");
     const id_group = $(this).data("id_group");
+    const name_group = $(this).data("name_group");
     console.log("products", products);
+    console.log("name_group", name_group);
+    $(".selected-group-name").html(name_group);
 
     // Populate the popup with products
     if (products && products.length > 0) {
@@ -181,7 +184,9 @@ $(document).ready(function () {
         acc[product.id_group].products.push(product);
         return acc;
       }, {});
-
+      // $('.sub-total').show().text(`$${selectedProducts.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2)}`);
+      $('.total-info').show();
+      $('.total').text(`$${selectedProducts.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2)}`);
       // Create HTML for each group
       const groupedHtml = Object.values(groupedProducts)
         .map(

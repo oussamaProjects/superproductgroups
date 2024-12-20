@@ -2,12 +2,11 @@
   display: none;
 } /* General Layout */
 
-
 #list-super-product-groups h3 {
   font-size: 1.5rem;
   color: #333;
   font-weight: bold;
-  margin:32px 0 20px;
+  margin: 32px 0 20px;
 }
 
 /* Group Item Styles */
@@ -51,11 +50,11 @@
   color: #333;
   margin-right: 10px;
 }
-
-.side-popup-after-body .selected-groups-list .js-view-selected-products {
+.selected-groups-list-container .infos.total-info{
   display: none;
+  margin: 16px 0;
 }
-
+.selected-groups-list-container .infos,
 .selected-groups-list .group {
   display: flex;
   justify-content: space-between;
@@ -153,7 +152,10 @@
   border-radius: 16px;
 }
 
- {
+.side-popup-body .login-message {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 16px;
 }
 
 .custom-product {
