@@ -3,6 +3,7 @@ services:
   PrestaShop\Module\SuperProductGroups\Service\GroupService:
     public: true
     autowire: true
+    class: PrestaShop\Module\SuperProductGroups\Service\GroupService
 
   PrestaShop\Module\SuperProductGroups\Form\Modifier\ProductFormModifier:
     autowire: true

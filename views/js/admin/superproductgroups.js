@@ -359,7 +359,7 @@ $(document).ready(function () {
         groupId: currentGroupId, // Pass the group ID (store it when opening the popup)
         // productIds: selectedProducts,
         products: selectedProducts, // Pass the product IDs and their order
-        // _token: adminToken, // CSRF token for security
+        _token: adminToken, // CSRF token for security
       },
 
       success: function (response) {

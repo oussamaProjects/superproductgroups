@@ -7,6 +7,12 @@ $(document).ready(function () {
   const $selectedProductsList = $("#selected-products-list");
   const $selectedGroupsList = $(".selected-groups-list");
 
+  const $product_prices = $(".js-product-prices");
+  const $product_actions = $(".js-product-actions");
+
+  $product_prices.hide();
+  $product_actions.hide();
+
   let selectedProducts = [];
   let groupedProducts = [];
 
@@ -58,9 +64,12 @@ $(document).ready(function () {
                   />
                 </div>
 
+                <div class="product-count">1</div>
                 <div class="product-label">${product.name}</div>
                 <div class="product-price">
-                  $${parseFloat(product.price).toFixed(2)}
+                  $${parseFloat(product.price).toFixed(
+                    2
+                  )} <span>PRIX PUBLIC</span>
                 </div>
 
               </div>
@@ -101,10 +110,12 @@ $(document).ready(function () {
 
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
-    $(`#product-${productId}`)
-      .closest(".custom-product")
+    const product = checkbox.closest(".custom-product");
+
+    product.find(".product-count").text(newQuantity);
+    product
       .find(".product-price")
-      .text(`$${totalPrice.toFixed(2)}`);
+      .html(`$${totalPrice.toFixed(2)} <span>PRIX PUBLIC</span>`);
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
@@ -122,10 +133,11 @@ $(document).ready(function () {
 
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
-    $(`#product-${productId}`)
-      .closest(".custom-product")
+    const product = $(`#product-${productId}`).closest(".custom-product");
+    product.find(".product-count").text(newQuantity);
+    product
       .find(".product-price")
-      .text(`$${totalPrice.toFixed(2)}`);
+      .html(`$${totalPrice.toFixed(2)} <span>PRIX PUBLIC</span>`);
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
@@ -144,7 +156,7 @@ $(document).ready(function () {
 
       // Show/hide based on the search query
       if (productName.includes(searchQuery)) {
-        $item.show();
+        $item.css("display", "flex");
       } else {
         $item.hide();
       }
@@ -184,9 +196,17 @@ $(document).ready(function () {
         acc[product.id_group].products.push(product);
         return acc;
       }, {});
-      // $('.sub-total').show().text(`$${selectedProducts.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2)}`);
-      $('.total-info').show();
-      $('.total').text(`$${selectedProducts.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2)}`);
+      // $('.sub-total').css('display', 'flex').text(`$${selectedProducts.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2)}`);
+      $(".total-info").css("display", "flex");
+      $(".total").text(
+        `$${selectedProducts
+          .reduce(
+            (acc, product) =>
+              acc + parseFloat(product.price) * product.quantity,
+            0
+          )
+          .toFixed(2)}`
+      );
       // Create HTML for each group
       const groupedHtml = Object.values(groupedProducts)
         .map(
@@ -209,7 +229,7 @@ $(document).ready(function () {
                               <div class="product-label">${product.name}</div>
                               <div class="product-price">$${parseFloat(
                                 product.price * product.quantity
-                              ).toFixed(2)}</div>
+                              ).toFixed(2)} </div>
                             </div>
                           </div>`
                     )
@@ -327,24 +347,31 @@ $(document).ready(function () {
 
     // Update the data-product attribute
     const selectedProduct = $(`#selected-product-${productId}`);
+
+    selectedProduct.find(".product-quantity").text(newQuantity);
+
     const productData = JSON.parse(selectedProduct.attr("data-product"));
     productData.quantity = newQuantity;
 
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
-    $(`#selected-product-${productId}`)
-      .find(".product-quantity")
-      .text(newQuantity);
-    $(`#selected-product-${productId}`)
-      .find(".product-price")
-      .text(`$${totalPrice.toFixed(2)}`);
+
+    selectedProduct.find(".product-price").html(`$${totalPrice.toFixed(2)}`);
 
     selectedProduct.attr("data-product", JSON.stringify(productData));
     console.log("Updated selectedProducts:", selectedProducts); // Debugging output
   });
 
   // Handle confirmation of selected products
-  $(".js-add-confirmed-selection-to-cart").on("click", function () {
+  $(".add-to-cart").on("click", function () {
+    addToCart();
+  });
+
+  $(".order").on("click", function () {
+    addToCart(prestashop.urls.pages.order);
+  });
+
+  function addToCart(redirectUrl = prestashop.urls.pages.cart) {
     if (!selectedProducts || selectedProducts.length === 0) {
       console.warn("No products selected to add to the cart.");
       return;
@@ -412,7 +439,7 @@ $(document).ready(function () {
           $(this).remove(); // Remove the message after fading out
         });
 
-      window.location.reload();
+      window.location.href = redirectUrl;
 
       // Hide the popup
       $selectedProductsPopup.removeClass("visible");
@@ -420,7 +447,7 @@ $(document).ready(function () {
 
     // Iterate over selected products and add them to the cart
     selectedProducts.forEach(addToCart);
-  });
+  }
 
   // Close selected products popup
   $(".js-close-selected-popup").on("click", function () {
