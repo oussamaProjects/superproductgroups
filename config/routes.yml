@@ -57,3 +57,15 @@ superproductgroups_export_group_products:
   methods: [GET]
   defaults:
     _controller: '\PrestaShop\Module\SuperProductGroups\Controller\Admin\SuperProductGroupsController::exportGroupProducts'
+
+# module_superproductgroups_ajax_save_selected_products:
+#   path: /superproductgroups/ajax-process-save-selected-products
+#   defaults:
+#     _controller: 'PrestaShop\Module\SuperProductGroups\Controller\Front\GroupProductController::ajaxProcessSaveSelectedProducts'
+#   methods: [POST]
+
+# module_superproductgroups_ajax_get_selected_products:
+#   path: /superproductgroups/ajax-process-get-selected-products
+#   defaults:
+#     _controller: 'PrestaShop\Module\SuperProductGroups\Controller\Front\GroupProductController::ajaxProcessGetSelectedProducts'
+#   methods: [POST]

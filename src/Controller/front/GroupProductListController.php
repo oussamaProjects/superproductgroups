@@ -1,6 +1,6 @@
 <?php
 
-namespace SuperProductGroups\Controller\Front;
+namespace PrestaShop\Module\SuperProductGroups\Controller\Front;
 
 class GroupProductController extends ModuleFrontController
 {
@@ -41,4 +41,5 @@ class GroupProductController extends ModuleFrontController
 
     die(json_encode(['products' => $products]));
   }
+
 }

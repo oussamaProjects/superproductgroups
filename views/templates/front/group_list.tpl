@@ -72,17 +72,17 @@
 			<div id="group-products" class=""></div>
 		</div>
 
+		<div class="side-popup-footer">
+			{* <button type="button" class="custom-button btn btn-secondary js-close-popup">Close</button> *}
+			<button type="button" class="custom-button js-confirm-selection">Valider ma séléction</button>
+		</div>
+
 		<div class="side-popup-after-body">
 			<div class="selected-groups-list-container">
 				{* <div class="infos">Sous-total <strong class="sub-total"></strong></div> *}
 				<div class="total-info infos">Total éclaté technique <strong class="total"></strong></div>
 				<ul class="selected-groups-list"></ul>
 			</div>
-		</div>
-
-		<div class="side-popup-footer">
-			{* <button type="button" class="custom-button btn btn-secondary js-close-popup">Close</button> *}
-			<button type="button" class="custom-button js-confirm-selection">Valider ma séléction</button>
 		</div>
 
 	</div>
@@ -95,8 +95,8 @@
 
 			<div class="notice">Décocher produit : suppression du panier et la ligne s'enlève</div>
 			<div class="title">
-				Valider ma sélection
-				<div class="blue"><strong>{$product.name}</strong></div>
+        Valider ma sélection
+        <div class="blue"><strong>{$product.name}</strong></div>
 			</div>
 
 			<button type="button" class="btn-close js-close-selected-popup" aria-label="Close">
@@ -109,16 +109,16 @@
 				{if !$logged}
 				<div>
 					<span>{l s='Vous êtes professionnel ? ' d='Shop.Module.superproductgroups'}</span>
-					<a href="{$urls.pages.authentication}?back={$urls.current_url|urlencode}"
-						title="{l s='Log in to your customer account' d='Shop.Module.superproductgroups'}"
-						rel="nofollow">
+					<a href="{$urls.pages.authentication}?back={$urls.current_url|urlencode}" title="{l s='Log in to your customer account' d='Shop.Module.superproductgroups'}" rel="nofollow">
 						<span class="hidden-sm-down">{l s='Sign in' d='Shop.Module.superproductgroups'}</span>
 					</a>
 				</div>
-				<div>{l s='pour accéder au cataloque prix dédié aux professionnels.' d='Shop.Module.superproductgroups'}
-					</div>
+				<div>
+          {l s='pour accéder au cataloque prix dédié aux professionnels.' d='Shop.Module.superproductgroups'}
+				</div>
 				{/if}
 			</div>
+
 			<ul id="selected-products-list" class="list-group"></ul>
 		</div>
 

@@ -176,6 +176,8 @@ class SuperProductGroups extends Module
             AND pl.id_shop = ' . (int) \Shop::getContextShopID()
     );
 
+    $sql->orderBy('pgr.id_group ASC');
+
     $result = \Db::getInstance()->executeS($sql);
 
     if (!$result) {

@@ -66,7 +66,9 @@ class GroupService
             AND pl.id_lang = ' . (int) \Context::getContext()->language->getId() . '
             AND pl.id_shop = ' . (int) \Shop::getContextShopID()
         );
-
+        
+		$sql->orderBy('pgr.id_group ASC');
+        
         $result = \Db::getInstance()->executeS($sql);
 
         if (!$result) {

@@ -2,26 +2,27 @@
 	id="group-form" data-action="{{ path('superproductgroups_handle_form_submit') }}">
 
 	<!-- Add hidden input for current product ID -->
-	<input type="hidden" id="current-product-id" name="id_super_product" value="{{ super_product.id }}">
+	<input
+	type="hidden" id="current-product-id" name="id_super_product" value="{{ super_product.id }}">
 
-	{{ form_start(form) }}
+	{# {{ form_start(form) }} #}
 	{{ form_errors(form) }}
 
-  <div id="group-rows" data-prototype="
-    <div class='group-entry mb-3'>
-        <div class='row align-items-center'>
-            <div class='col-md-3'>
-                {{ form_widget(form.groups.vars.prototype['group_name'], {'attr': {'class': 'form-control'}})|e('html_attr') }}
-            </div>
-            <div class='col-md-4'>
-                {{ form_widget(form.groups.vars.prototype['group_image'], {'attr': {'class': 'form-control-file'}})|e('html_attr') }}
-            </div>
-            <div class='col-md-3'>
-                {{ form_widget(form.groups.vars.prototype['group_products'], {'attr': {'class': 'js-product-search form-control'}})|e('html_attr') }}
-            </div>
-        </div>
-    </div>
-">
+	<div id="group-rows" data-prototype="
+			    <div class='group-entry mb-3'>
+			        <div class='row align-items-center'>
+			            <div class='col-md-3'>
+			                {{ form_widget(form.groups.vars.prototype['group_name'], {'attr': {'class': 'form-control'}})|e('html_attr') }}
+			            </div>
+			            <div class='col-md-4'>
+			                {{ form_widget(form.groups.vars.prototype['group_image'], {'attr': {'class': 'form-control-file'}})|e('html_attr') }}
+			            </div>
+			            <div class='col-md-3'>
+			                {{ form_widget(form.groups.vars.prototype['group_products'], {'attr': {'class': 'js-product-search form-control'}})|e('html_attr') }}
+			            </div>
+			        </div>
+			    </div>
+			">
 
 		{% for group in form.groups %}
 			<div class="group-entry mb-3">
@@ -31,7 +32,8 @@
 						{{ form_widget(group.group_name) }}
 					</div>
 
-					<div class="col-md-4 d-flex align-items-center">
+					<div
+						class="col-md-4 d-flex align-items-center">
 
 						{# Check if the group already has an image saved #}
 						{% if group.vars['value']['group_image'] %}
@@ -44,13 +46,13 @@
 
 					<div class="col-md-3">
 						<button type="button" class="btn btn-secondary js-open-product-popup w-full" data-group-id="{{ group.group_id.vars.value }}" data-group-products="{{ group.group_products.vars.value|join(',') }}">
-							Products:
+							Produits :
 							<span class="product-count">{{ group.group_products.vars.value|length }}</span>
 						</button>
 					</div>
 
 					<div class="col-md-2">
-						<button type="button" class="btn btn-danger js-delete-group w-full" data-group-id="{{ group.group_id.vars.value }}">Retiré</button>
+						<button type="button" class="btn btn-danger js-delete-group w-full" data-group-id="{{ group.group_id.vars.value }}">Supprimer</button>
 					</div>
 				</div>
 			</div>
@@ -66,7 +68,7 @@
 		</div>
 	</div>
 
-	{{ form_end(form) }}
+	{# {{ form_end(form) }} #}
 
 	<div id="message-container" class="mt-3"></div>
 </div>
@@ -82,9 +84,10 @@
 
 		<!-- Search and Actions -->
 		<div class="popup-actions">
-			<div class="action-buttons">
+			<div
+				class="action-buttons">
 				{# <button type="button" class="btn btn-secondary js-export-products">Exporter</button>
-				<button type="button" class="btn btn-secondary">Importer</button> #}
+								<button type="button" class="btn btn-secondary">Importer</button> #}
 				<button type="button" class="btn btn-danger js-delete-all-products">Supprimer tous les produits</button>
 			</div>
 		</div>

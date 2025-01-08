@@ -9,12 +9,145 @@ $(document).ready(function () {
 
   const $product_prices = $(".js-product-prices");
   const $product_actions = $(".js-product-actions");
+  const $add_to_cart = $(".js-product-actions js-product-add-to-cart");
 
   $product_prices.hide();
-  $product_actions.hide();
+  // $product_actions.hide();
+  $add_to_cart.hide();
 
   let selectedProducts = [];
   let groupedProducts = [];
+
+  function saveSelectedProducts(products) {
+    const ajaxUrl =
+      prestashop.urls.base_url +
+      "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=SaveSelectedProducts";
+
+    console.log("Saving products to:", ajaxUrl);
+
+    $.ajax({
+      url: ajaxUrl,
+      type: "POST",
+      data: { selectedProducts: products },
+      success: function (response) {
+        const res = JSON.parse(response);
+        if (res.status === "success") {
+          console.log("Products saved successfully:", res.message);
+        } else {
+          console.error("Error saving products:", res.message);
+        }
+      },
+      error: function (xhr) {
+        console.error("AJAX Error:", xhr.responseText);
+      },
+    });
+  }
+
+  function getSelectedProducts() {
+    const ajaxUrl =
+      prestashop.urls.base_url +
+      "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=GetSelectedProducts";
+
+    console.log("Fetching products from:", ajaxUrl);
+
+    $.ajax({
+      url: ajaxUrl,
+      type: "POST",
+      success: function (response) {
+        const res = JSON.parse(response);
+        if (res.status === "success") {
+          console.log("Loaded selected products:", res.selectedProducts);
+          selectedProducts = res.selectedProducts;
+
+          initProductActions();
+        } else {
+          console.error("Error retrieving products:", res.message);
+        }
+      },
+      error: function (xhr) {
+        console.error("AJAX Error:", xhr.responseText);
+      },
+    });
+  }
+
+  getSelectedProducts();
+
+  function initProductActions() {
+    if (selectedProducts.length > 0) {
+      // Group products by their id_group
+      groupedProducts = selectedProducts.reduce((acc, product) => {
+        if (!acc[product.id_group]) {
+          acc[product.id_group] = {
+            group_name: product.group_name,
+            total_price: 0,
+            products: [],
+          };
+        }
+        acc[product.id_group].total_price +=
+          parseFloat(product.price) * product.quantity;
+        acc[product.id_group].products.push(product);
+        return acc;
+      }, {});
+      // $('.sub-total').css('display', 'flex').text(`$${selectedProducts.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2)}`);
+      $(".total-info").css("display", "flex");
+      $(".total").text(
+        `${selectedProducts
+          .reduce(
+            (acc, product) =>
+              acc + parseFloat(product.price) * product.quantity,
+            0
+          )
+          .toFixed(2)} €`
+      );
+
+      // Create HTML for each group
+      const groupedHtml = Object.values(groupedProducts)
+        .map(
+          (group) =>
+            `<div class="group">
+                  <div class="group-name">${group.group_name}</div>
+                  <div class="group-total-price">${group.total_price.toFixed(
+                    2
+                  )} €</div>
+                   <span class="js-view-selected-products">Voir Produits Sélectionnés</span>
+                <div class="hidden group-products">
+                  ${group.products
+                    .map(
+                      (product, index) =>
+                        `<div class="product-check">
+                            <div class="product-infos">
+                              <div class="product-number">${index + 1}</div>
+                              <div class="product-label">${product.name}</div>
+                              <div class="product-price">${parseFloat(
+                                product.price * product.quantity
+                              ).toFixed(2)} €</div>
+                            </div>
+                          </div>`
+                    )
+                    .join("")}
+                </div>
+            </div>
+            `
+        )
+        .join("");
+
+      $selectedGroupsList.html(
+        `
+          ${groupedHtml}
+          <div class="row">
+            <div class="col-md-6">
+              <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Voir le panier</button>
+            </div>
+            <div class="col-md-6">
+              <button type="button" class="custom-button order js-add-confirmed-selection-to-cart">Commander</button>
+            </div>
+          </div>
+      `
+      );
+    } else {
+      $selectedGroupsList.html("<p>Aucun produit sélectionné.</p>");
+    }
+  }
 
   // Open side popup and populate products
   $(".js-open-group-popup").on("click", function (e) {
@@ -30,7 +163,7 @@ $(document).ready(function () {
     if (products && products.length > 0) {
       const productsHtml = products
         .map(
-          (product) =>
+          (product, index) =>
             `<div class="custom-product">
               <div class="product-image">
                 <img src="${product.image}" alt="${product.name}">
@@ -64,12 +197,12 @@ $(document).ready(function () {
                   />
                 </div>
 
-                <div class="product-count">1</div>
+                <div class="product-count">${index + 1}</div>
                 <div class="product-label">${product.name}</div>
                 <div class="product-price">
-                  $${parseFloat(product.price).toFixed(
+                  ${parseFloat(product.price).toFixed(
                     2
-                  )} <span>PRIX PUBLIC</span>
+                  )} €<span>PRIX PUBLIC</span>
                 </div>
 
               </div>
@@ -112,10 +245,10 @@ $(document).ready(function () {
     const totalPrice = parseFloat(productData.price) * newQuantity;
     const product = checkbox.closest(".custom-product");
 
-    product.find(".product-count").text(newQuantity);
+    // product.find(".product-count").text(newQuantity);
     product
       .find(".product-price")
-      .html(`$${totalPrice.toFixed(2)} <span>PRIX PUBLIC</span>`);
+      .html(`${totalPrice.toFixed(2)} €<span>PRIX PUBLIC</span>`);
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
@@ -134,10 +267,10 @@ $(document).ready(function () {
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
     const product = $(`#product-${productId}`).closest(".custom-product");
-    product.find(".product-count").text(newQuantity);
+    // product.find(".product-count").text(newQuantity);
     product
       .find(".product-price")
-      .html(`$${totalPrice.toFixed(2)} <span>PRIX PUBLIC</span>`);
+      .html(`${totalPrice.toFixed(2)} €<span>PRIX PUBLIC</span>`);
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
@@ -173,78 +306,29 @@ $(document).ready(function () {
       .get();
 
     // Add new products without replacing existing ones
+    // newlySelectedProducts.forEach((product) => {
+    //   if (!selectedProducts.some((p) => p.id === product.id)) {
+    //     selectedProducts.push(product);
+    //   }
+    // });
+
+    // Updateproducts without replacing existing ones
     newlySelectedProducts.forEach((product) => {
-      if (!selectedProducts.some((p) => p.id === product.id)) {
+      const existingProduct = selectedProducts.find((p) => p.id === product.id);
+      if (existingProduct) {
+        existingProduct.quantity =
+          parseFloat(existingProduct.quantity) + parseFloat(product.quantity);
+      } else {
         selectedProducts.push(product);
       }
     });
 
     console.log("Selected Products:", selectedProducts); // Replace with your logic
 
-    if (selectedProducts.length > 0) {
-      // Group products by their id_group
-      groupedProducts = selectedProducts.reduce((acc, product) => {
-        if (!acc[product.id_group]) {
-          acc[product.id_group] = {
-            group_name: product.group_name,
-            total_price: 0,
-            products: [],
-          };
-        }
-        acc[product.id_group].total_price +=
-          parseFloat(product.price) * product.quantity;
-        acc[product.id_group].products.push(product);
-        return acc;
-      }, {});
-      // $('.sub-total').css('display', 'flex').text(`$${selectedProducts.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2)}`);
-      $(".total-info").css("display", "flex");
-      $(".total").text(
-        `$${selectedProducts
-          .reduce(
-            (acc, product) =>
-              acc + parseFloat(product.price) * product.quantity,
-            0
-          )
-          .toFixed(2)}`
-      );
-      // Create HTML for each group
-      const groupedHtml = Object.values(groupedProducts)
-        .map(
-          (group) =>
-            `<div class="group">
-                  <div class="group-name">${group.group_name}</div>
-                  <div class="group-total-price">$${group.total_price.toFixed(
-                    2
-                  )}</div>
-                   <span class="js-view-selected-products">Voir Produits Sélectionnés</span>
-                <div class="hidden group-products">
-                  ${group.products
-                    .map(
-                      (product) =>
-                        `<div class="product-check">
-                            <div class="product-infos">
-                              <div class="product-quantity">${
-                                product.quantity
-                              }</div>
-                              <div class="product-label">${product.name}</div>
-                              <div class="product-price">$${parseFloat(
-                                product.price * product.quantity
-                              ).toFixed(2)} </div>
-                            </div>
-                          </div>`
-                    )
-                    .join("")}
-                </div>
-            </div>`
-        )
-        .join("");
-
-      $selectedGroupsList.html(groupedHtml);
-    } else {
-      $selectedGroupsList.html("<p>Aucun produit sélectionné.</p>");
-    }
-
     // Hide the popup
+    initProductActions();
+    saveSelectedProducts(selectedProducts);
+
     $groupPopup.removeClass("visible");
   });
 
@@ -265,7 +349,7 @@ $(document).ready(function () {
                   <!-- Products within the group -->
                   ${group.products
                     .map(
-                      (product) =>
+                      (product, index) =>
                         `<div id="selected-product-${
                           product.id
                         }" class="product" data-product='${JSON.stringify(
@@ -274,19 +358,22 @@ $(document).ready(function () {
 
                           <!-- Product Information -->
                           <div class="product-infos">
-                            <div class="product-quantity">${
-                              product.quantity
-                            }</div>
+                            <div class="product-number">${index + 1}</div>
                             <div class="product-label">${product.name} (Code: ${
                           product.code || "N/A"
                         })</div>
-                            <div class="product-price">$${parseFloat(
+                            <div class="product-price">${parseFloat(
                               product.price * product.quantity
-                            ).toFixed(2)}</div>
+                            ).toFixed(2)} €</div>
                           </div>
 
                           <!-- Product Actions -->
                           <div class="product-actions">
+                            <button class="btn-delete" data-product-id="${
+                              product.id
+                            }">
+                              <i class-"fa fa-delete"></i>X
+                            </button>
                             <div class="quantity-selector">
                               <button class="btn-quantity minus" data-product-id="${
                                 product.id
@@ -348,7 +435,7 @@ $(document).ready(function () {
     // Update the data-product attribute
     const selectedProduct = $(`#selected-product-${productId}`);
 
-    selectedProduct.find(".product-quantity").text(newQuantity);
+    // selectedProduct.find(".product-quantity").text(newQuantity);
 
     const productData = JSON.parse(selectedProduct.attr("data-product"));
     productData.quantity = newQuantity;
@@ -356,18 +443,52 @@ $(document).ready(function () {
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
 
-    selectedProduct.find(".product-price").html(`$${totalPrice.toFixed(2)}`);
+    selectedProduct.find(".product-price").html(`${totalPrice.toFixed(2)} €`);
 
     selectedProduct.attr("data-product", JSON.stringify(productData));
+
+    $(".total").text(
+      `${selectedProducts
+        .reduce(
+          (acc, product) => acc + parseFloat(product.price) * product.quantity,
+          0
+        )
+        .toFixed(2)} €`
+    );
+    saveSelectedProducts(selectedProducts);
     console.log("Updated selectedProducts:", selectedProducts); // Debugging output
   });
 
+  $selectedProductsPopup.on("click", ".btn-delete", function (e) {
+    e.preventDefault();
+    const productId = $(this).data("product-id");
+
+    // Find and remove the product from selectedProducts
+    selectedProducts = selectedProducts.filter((p) => p.id != productId);
+
+    // delete the ui row of the product
+    $(`#selected-product-${productId}`).remove();
+
+    $(".total").text(
+      `${selectedProducts
+        .reduce(
+          (acc, product) => acc + parseFloat(product.price) * product.quantity,
+          0
+        )
+        .toFixed(2)} €`
+    );
+    saveSelectedProducts(selectedProducts);
+  });
+
+
   // Handle confirmation of selected products
-  $(".add-to-cart").on("click", function () {
+  $(document).on("click", ".add-to-cart", function (e) {
+    e.preventDefault();
     addToCart();
   });
 
-  $(".order").on("click", function () {
+  $(document).on("click", ".order", function (e) {
+    e.preventDefault();
     addToCart(prestashop.urls.pages.order);
   });
 

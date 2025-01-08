@@ -80,6 +80,9 @@ $(document).ready(function () {
         }
       });
 
+      console.log("formData", formData);
+      
+
     $.ajax({
       url: actionUrl, // Use the form's action attribute
       type: "POST",
@@ -189,8 +192,6 @@ $(document).ready(function () {
     }
 
     console.log("Opening product popup for group ID:", currentGroupId);
-    console.log("Selected products:", groupProducts);
-
     // Fetch the product list via AJAX
     $.ajax({
       url: `${adminBaseUrl}/modules/superproductgroups/ajax-group-products`,
@@ -350,7 +351,8 @@ $(document).ready(function () {
       alert("Aucun produit sélectionné !");
       return;
     }
-
+    console.log("Selected products:", selectedProducts);
+    
     // Example AJAX request to save products to the group
     $.ajax({
       url: `${adminBaseUrl}/modules/superproductgroups/save-group-products?_token=${adminToken}`, // Replace with actual endpoint
@@ -385,6 +387,7 @@ $(document).ready(function () {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit du groupe ?")) {
       return;
     }
+console.log("productId", productId);
 
     // AJAX call to delete the product from the group
     $.ajax({
@@ -437,6 +440,7 @@ $(document).ready(function () {
     ) {
       return;
     }
+console.log("currentGroupId", currentGroupId);
 
     // AJAX call to delete all products in the group
     $.ajax({
@@ -457,6 +461,8 @@ $(document).ready(function () {
   });
 
   $(document).on("click", ".js-export-products", function () {
+    console.log("Exporting products for group ID:", currentGroupId);
+    
     // AJAX call to fetch group products
     $.ajax({
       url: `${adminBaseUrl}/modules/superproductgroups/export-group-products?_token=${adminToken}`,

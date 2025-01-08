@@ -13,8 +13,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class SuperProductGroupsController extends FrameworkBundleAdminController
 {
 	/**
-		* @Route("/superproductgroups/handle-form-submit", name="superproductgroups_handle_form_submit", methods={"POST"})
-		*/
+	 * @Route("/superproductgroups/handle-form-submit", name="superproductgroups_handle_form_submit", methods={"POST"})
+	 */
 	public function handleFormSubmit(Request $request): JsonResponse
 	{
 		$superProductId = (int)$request->request->get('id_super_product');
@@ -54,8 +54,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
 
 	/**
-		* Saves or updates groups and their associated products.
-		*/
+	 * Saves or updates groups and their associated products.
+	 */
 	private function saveOrUpdateGroups(array $groups, int $superProductId): void
 	{
 
@@ -72,12 +72,11 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 				$this->saveOrUpdateProductAssociations($groupId, $groupProducts);
 			}
 		}
-
 	}
 
 	/**
-		* Uploads the provided image file.
-		*/
+	 * Uploads the provided image file.
+	 */
 	private function uploadImage(UploadedFile $file): string
 	{
 
@@ -89,8 +88,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 	}
 
 	/**
-		* Saves or updates a group and returns its ID.
-		*/
+	 * Saves or updates a group and returns its ID.
+	 */
 	private function saveOrUpdateGroup(?int $groupId, string $name, ?string $imagePath, int $superProductId): int
 	{
 		$db = \Db::getInstance();
@@ -119,8 +118,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 	}
 
 	/**
-		* Saves or updates associations between the group and selected products.
-		*/
+	 * Saves or updates associations between the group and selected products.
+	 */
 	private function saveOrUpdateProductAssociations(int $groupId, array $groupProducts): void
 	{
 		$db = \Db::getInstance();
@@ -157,8 +156,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 	}
 
 	/**
-		* Fetches existing group IDs from the database.
-		*/
+	 * Fetches existing group IDs from the database.
+	 */
 	private function getExistingGroupIds(): array
 	{
 		return array_column(
@@ -173,8 +172,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
 
 	/**
-		* @Route("/superproductgroups/save-group-products", name="superproductgroups_save_group_products", methods={"POST"})
-		*/
+	 * @Route("/superproductgroups/save-group-products", name="superproductgroups_save_group_products", methods={"POST"})
+	 */
 	public function saveGroupProducts(Request $request): JsonResponse
 	{
 
@@ -190,20 +189,20 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 		try {
 
 			// Delete existing relationships for the group to ensure clean data
-      $db->delete('product_group_relationship', 'id_group = ' . (int) $groupId);
+			$db->delete('product_group_relationship', 'id_group = ' . (int) $groupId);
 
-      // Insert the new products with their order
-      foreach ($products as $product) {
-          if (!isset($product['id']) || !isset($product['order'])) {
-              continue; // Skip invalid product data
-          }
+			// Insert the new products with their order
+			foreach ($products as $product) {
+				if (!isset($product['id']) || !isset($product['order'])) {
+					continue; // Skip invalid product data
+				}
 
-          $db->insert('product_group_relationship', [
-              'id_group' => $groupId,
-              'id_product' => (int) $product['id'],
-              'product_order' => (int) $product['order'], // Save the order
-          ]);
-      }
+				$db->insert('product_group_relationship', [
+					'id_group' => $groupId,
+					'id_product' => (int) $product['id'],
+					'product_order' => (int) $product['order'], // Save the order
+				]);
+			}
 
 			return new JsonResponse(['status' => 'success', 'message' => 'Products saved successfully']);
 		} catch (\Exception $e) {
@@ -212,8 +211,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 	}
 
 	/**
-		* @Route("/modules/superproductgroups/delete-group", name="superproductgroups_delete_group", methods={"POST"})
-		*/
+	 * @Route("/modules/superproductgroups/delete-group", name="superproductgroups_delete_group", methods={"POST"})
+	 */
 	public function deleteGroup(Request $request): JsonResponse
 	{
 		$groupId = (int) $request->request->get('groupId');
@@ -246,8 +245,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
 
 	/**
-		* @Route("/modules/superproductgroups/delete-group-product", name="superproductgroups_delete_group_product", methods={"POST"})
-		*/
+	 * @Route("/modules/superproductgroups/delete-group-product", name="superproductgroups_delete_group_product", methods={"POST"})
+	 */
 	public function deleteGroupProduct(Request $request): JsonResponse
 	{
 		$groupId = (int)$request->request->get('groupId');
@@ -275,8 +274,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
 
 	/**
-		* @Route("/modules/superproductgroups/delete-group-products", name="superproductgroups_delete_group_products", methods={"POST"})
-		*/
+	 * @Route("/modules/superproductgroups/delete-group-products", name="superproductgroups_delete_group_products", methods={"POST"})
+	 */
 	public function deleteGroupProducts(Request $request): JsonResponse
 	{
 		$groupId = (int)$request->request->get('groupId');
@@ -302,8 +301,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 	}
 
 	/**
-		* @Route("/superproductgroups/ajax-products", name="admin_superproductgroups_ajax_products", methods={"GET"})
-		*/
+	 * @Route("/superproductgroups/ajax-products", name="admin_superproductgroups_ajax_products", methods={"GET"})
+	 */
 	public function ajaxProducts(Request $request): JsonResponse
 	{
 		// Get the search query from the request
@@ -319,7 +318,7 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 			->where('pl.name LIKE "%' . pSQL($search) . '%"') // Match the search query
 			->where('pl.id_lang = ' . $languageId) // Filter by the current language
 			->groupBy('pl.id_product') // Ensure no duplicate rows for the same product
-      ->orderBy('pgr.product_order ASC');
+			->orderBy('pgr.product_order ASC');
 
 		// Execute the query and fetch the results
 		$products = \Db::getInstance()->executeS($sql);
@@ -337,8 +336,8 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 	}
 
 	/**
-		* @Route("/superproductgroups/ajax-group-products", name="admin_superproductgroups_ajax_group_products", methods={"GET"})
-		*/
+	 * @Route("/superproductgroups/ajax-group-products", name="admin_superproductgroups_ajax_group_products", methods={"GET"})
+	 */
 	public function ajaxGroupProducts(Request $request): JsonResponse
 	{
 		$groupId = $request->query->get('group_id');
@@ -352,20 +351,16 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 		$sql->innerJoin('product_shop', 'ps', 'ps.id_product = p.id_product');
 		$sql->where('pgr.id_group = ' . (int) $groupId);
 		$sql->where('pl.id_lang = ' . (int) \Context::getContext()->language->id);
-    $sql->orderBy('pgr.product_order ASC');
+		$sql->orderBy('pgr.id_group ASC');
 
 		$products = \Db::getInstance()->executeS($sql);
 
 		return new JsonResponse(['products' => $products]);
 	}
 
-
-
-
-
 	/**
-		* @Route("/modules/superproductgroups/export-group-products", name="superproductgroups_export_group_products", methods={"GET"})
-		*/
+	 * @Route("/modules/superproductgroups/export-group-products", name="superproductgroups_export_group_products", methods={"GET"})
+	 */
 	public function exportGroupProducts(Request $request): Response
 	{
 		$groupId = (int)$request->query->get('groupId');
@@ -386,8 +381,7 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 			$sql->innerJoin('product', 'p', 'pl.id_product = p.id_product');
 			$sql->where('pgr.id_group = ' . (int)$groupId);
 			$sql->where('pl.id_lang = ' . (int)\Context::getContext()->language->id);
-      $sql->orderBy('pgr.product_order ASC');
-
+			$sql->orderBy('pgr.product_order ASC');
 
 			$products = $db->executeS($sql);
 
