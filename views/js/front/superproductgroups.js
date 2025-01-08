@@ -70,6 +70,28 @@ $(document).ready(function () {
     });
   }
 
+  function clearSelectedProducts() {
+    const ajaxUrl =
+      prestashop.urls.base_url +
+      "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=ClearSelectedProducts";
+
+    $.ajax({
+      url: ajaxUrl,
+      type: "POST",
+      success: function (response) {
+        const res = JSON.parse(response);
+        if (res.status === "success") {
+          console.log("Selected products cleared:", res.message);
+        } else {
+          console.error("Error clearing selected products:", res.message);
+        }
+      },
+      error: function (xhr) {
+        console.error("AJAX Error:", xhr.responseText);
+      },
+    });
+  }
+
   getSelectedProducts();
 
   function initProductActions() {
@@ -480,7 +502,6 @@ $(document).ready(function () {
     saveSelectedProducts(selectedProducts);
   });
 
-
   // Handle confirmation of selected products
   $(document).on("click", ".add-to-cart", function (e) {
     e.preventDefault();
@@ -559,6 +580,8 @@ $(document).ready(function () {
         .fadeOut(300, function () {
           $(this).remove(); // Remove the message after fading out
         });
+
+      clearSelectedProducts();
 
       window.location.href = redirectUrl;
 
