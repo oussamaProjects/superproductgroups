@@ -110,8 +110,17 @@ $(document).ready(function () {
         acc[product.id_group].products.push(product);
         return acc;
       }, {});
-      // $('.sub-total').css('display', 'flex').text(`$${selectedProducts.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2)}`);
+
       $(".total-info").css("display", "flex");
+      // $(".sub-total").text(
+      //   `${selectedProducts
+      //     .reduce(
+      //       (acc, product) =>
+      //         acc + parseFloat(product.price) * product.quantity,
+      //       0
+      //     )
+      //     .toFixed(2)} €`
+      // );
       $(".total").text(
         `${selectedProducts
           .reduce(
@@ -186,11 +195,11 @@ $(document).ready(function () {
     // Populate the popup with products
     if (products && products.length > 0) {
       const productsHtml = products
-        .map(
-          (product, index) =>
-            `<div class="custom-product">
+        .map((product, index) => {
+          const productImage = product.image ? product.image : '/img/p/fr-default-home_default.jpg';
+          return `<div class="custom-product">
               <div class="product-image">
-                <img src="${product.image}" alt="${product.name}">
+                <img src="${productImage}" alt="${product.name}">
               </div>
               <div class="product-infos" for="product-${product.id}">
 
@@ -225,6 +234,9 @@ $(document).ready(function () {
                 <div class="product-label">
                 ${product.name} (Code: ${product.reference || "N/A"})
                 </div>
+                <div class="product-code" style="display: none;">
+                  ${product.reference}
+                </div>
                 <div class="product-price">
                   ${parseFloat(product.price).toFixed(
                     2
@@ -233,8 +245,8 @@ $(document).ready(function () {
 
               </div>
 
-            </div>`
-        )
+            </div>`;
+        })
         .join("");
       $groupProductsContainer.html(productsHtml);
     } else {
@@ -303,24 +315,32 @@ $(document).ready(function () {
 
   // Handle product search
   $productSearchInput.on("input", function () {
-    const searchQuery = $(this).val().toLowerCase();
-    const $productItems = $groupProductsContainer.find(".product-label");
+    products_search(this, ".product-label");
+  });
+
+  $productSearchInputNum.on("input", function () {
+    products_search(this, ".product-code");
+  });
+
+  function products_search(inputElement, selector) {
+    // Get the search query
+    const searchQuery = $(inputElement).val().toLowerCase();
+    const $productItems = $groupProductsContainer.find(".custom-product");
+
     console.log("$productItems", $productItems);
 
     $productItems.each(function () {
-      const $item = $(this).closest(".custom-product");
-      console.log("$item", $item);
-
-      const productName = $item.find(".product-label").text().toLowerCase();
+      const $item = $(this);
+      const productNameOrCode = $item.find(selector).text().toLowerCase();
 
       // Show/hide based on the search query
-      if (productName.includes(searchQuery)) {
+      if (productNameOrCode.includes(searchQuery)) {
         $item.css("display", "flex");
       } else {
         $item.hide();
       }
     });
-  });
+  }
 
   // Handle confirmation of selected products
   $(".js-confirm-selection").on("click", function () {
@@ -340,7 +360,7 @@ $(document).ready(function () {
 
     // Updateproducts without replacing existing ones
     newlySelectedProducts.forEach((product) => {
-      const existingProduct = selectedProducts.find((p) => p.id === product.id);
+      const existingProduct = selectedProducts.find((p) => p.id == product.id);
       if (existingProduct) {
         existingProduct.quantity =
           parseFloat(existingProduct.quantity) + parseFloat(product.quantity);
