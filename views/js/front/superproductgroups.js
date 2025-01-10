@@ -139,7 +139,10 @@ $(document).ready(function () {
                         `<div class="product-check">
                             <div class="product-infos">
                               <div class="product-number">${index + 1}</div>
-                              <div class="product-label">${product.name}</div>
+                              <div class="product-label">
+                                ${product.name}
+                                 (Code: ${product.reference || "N/A"})
+                              </div>
                               <div class="product-price">${parseFloat(
                                 product.price * product.quantity
                               ).toFixed(2)} €</div>
@@ -178,7 +181,6 @@ $(document).ready(function () {
     const id_group = $(this).data("id_group");
     const name_group = $(this).data("name_group");
     console.log("products", products);
-    console.log("name_group", name_group);
     $(".selected-group-name").html(name_group);
 
     // Populate the popup with products
@@ -220,7 +222,9 @@ $(document).ready(function () {
                 </div>
 
                 <div class="product-count">${index + 1}</div>
-                <div class="product-label">${product.name}</div>
+                <div class="product-label">
+                ${product.name} (Code: ${product.reference || "N/A"})
+                </div>
                 <div class="product-price">
                   ${parseFloat(product.price).toFixed(
                     2
@@ -381,9 +385,10 @@ $(document).ready(function () {
                           <!-- Product Information -->
                           <div class="product-infos">
                             <div class="product-number">${index + 1}</div>
-                            <div class="product-label">${product.name} (Code: ${
-                          product.code || "N/A"
-                        })</div>
+                            <div class="product-label">
+                              ${product.name}
+                              (Code: ${product.reference || "N/A"})
+                            </div>
                             <div class="product-price">${parseFloat(
                               product.price * product.quantity
                             ).toFixed(2)} €</div>

@@ -217,6 +217,7 @@ class SuperProductGroups extends Module
           pg.image AS group_image,
           p.id_product AS product_id,
           pl.name AS product_name,
+          p.reference AS reference,
           ps.price AS product_price,
           pi.id_image AS product_image_id,
           pl.link_rewrite AS link_rewrite
@@ -299,6 +300,7 @@ class SuperProductGroups extends Module
           'id' => $row['product_id'],
           'id_group' => $row['id_group'],
           'group_name' => $row['group_name'],
+          'reference' => $row['reference'],
           'group_image' => $row['group_image'],
           'name' => $row['product_name'],
           'price' => number_format((float)$row['product_price'], 2, '.', ''), // Format price to 2 decimals
@@ -331,7 +333,6 @@ class SuperProductGroups extends Module
     $productId = (int)$params['product']['id_product'];
     // Fetch groups associated with this product
     $groups = $this->getThisProductGroupsWithProducts($productId);
-
     // Assign data to the template
     $this->context->smarty->assign([
       'product' => $params['product'],
