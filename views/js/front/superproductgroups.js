@@ -17,11 +17,12 @@ $(document).ready(function () {
 
   const bodyClass = $("body").attr("class");
   const productIdMatch = bodyClass.match(/product-id-(\d+)/);
+  
+  var productId = 0;
 
   if (productIdMatch && productIdMatch[1]) {
-    const productId = productIdMatch[1];
-    // console.log("Extracted Product ID:", productId);
-
+    productId = productIdMatch[1];
+    console.log("Extracted Product ID:", productId);
     // Proceed with your logic using productId
     checkProductGroups(productId);
   } else {
@@ -29,11 +30,10 @@ $(document).ready(function () {
   }
 
   function checkProductGroups(productId) {
-
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=CheckProductHasGroups";
-      // console.log("Checking products:", ajaxUrl);
+    // console.log("Checking products:", ajaxUrl);
 
     $.ajax({
       url: ajaxUrl,
@@ -55,11 +55,10 @@ $(document).ready(function () {
     });
   }
 
-
   let selectedProducts = [];
   let groupedProducts = [];
 
-  function saveSelectedProducts(products) {
+  function saveSelectedProducts(productId, products) {
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=SaveSelectedProducts";
@@ -69,7 +68,10 @@ $(document).ready(function () {
     $.ajax({
       url: ajaxUrl,
       type: "POST",
-      data: { selectedProducts: products },
+      data: {
+        selectedProducts: products,
+        id_product: productId,
+      },
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
@@ -84,7 +86,7 @@ $(document).ready(function () {
     });
   }
 
-  function getSelectedProducts() {
+  function getSelectedProducts(productId) {
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=GetSelectedProducts";
@@ -94,6 +96,7 @@ $(document).ready(function () {
     $.ajax({
       url: ajaxUrl,
       type: "POST",
+      data: { id_product: productId },
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
@@ -111,7 +114,7 @@ $(document).ready(function () {
     });
   }
 
-  function clearSelectedProducts() {
+  function clearSelectedProducts(productId) {
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=ClearSelectedProducts";
@@ -119,6 +122,7 @@ $(document).ready(function () {
     $.ajax({
       url: ajaxUrl,
       type: "POST",
+      data: { id_product: productId },
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
@@ -133,7 +137,7 @@ $(document).ready(function () {
     });
   }
 
-  getSelectedProducts();
+  getSelectedProducts(productId);
 
   function initProductActions() {
     if (selectedProducts.length > 0) {
@@ -179,14 +183,14 @@ $(document).ready(function () {
             `<div class="group">
                   <div class="group-name">${group.group_name}</div>
                   <div class="group-total-price">${group.total_price.toFixed(
-              2
-            )} €</div>
+                    2
+                  )} €</div>
                    <span class="js-view-selected-products">Voir Produits Sélectionnés</span>
                 <div class="hidden group-products">
                   ${group.products
-              .map(
-                (product, index) =>
-                  `<div class="product-check">
+                    .map(
+                      (product, index) =>
+                        `<div class="product-check">
                             <div class="product-infos">
                               <div class="product-number">${index + 1}</div>
                               <div class="product-label">
@@ -194,12 +198,12 @@ $(document).ready(function () {
                                  (Code: ${product.reference || "N/A"})
                               </div>
                               <div class="product-price">${parseFloat(
-                    product.price * product.quantity
-                  ).toFixed(2)} €</div>
+                                product.price * product.quantity
+                              ).toFixed(2)} €</div>
                             </div>
                           </div>`
-              )
-              .join("")}
+                    )
+                    .join("")}
                 </div>
             </div>
             `
@@ -211,7 +215,7 @@ $(document).ready(function () {
           ${groupedHtml}
           <div class="row">
             <div class="col-md-6">
-              <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Voir le panier</button>
+              <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Ajouter le panier</button>
             </div>
             <div class="col-md-6">
               <button type="button" class="custom-button order js-add-confirmed-selection-to-cart">Commander</button>
@@ -237,7 +241,9 @@ $(document).ready(function () {
     if (products && products.length > 0) {
       const productsHtml = products
         .map((product, index) => {
-          const productImage = product.image ? product.image : '/img/p/fr-default-home_default.jpg';
+          const productImage = product.image
+            ? product.image
+            : "/img/p/fr-default-home_default.jpg";
           return `<div class="custom-product">
               <div class="product-image">
                 <img src="${productImage}" alt="${product.name}">
@@ -247,12 +253,15 @@ $(document).ready(function () {
                 <div class="product-actions-container">
                   <div class="product-actions">
                     <div class="quantity-selector">
-                      <button class="btn-quantity minus" data-product-id="${product.id
-            }">-</button>
-                      <input type="number" class="quantity-input" id="quantity-${product.id
-            }" value="1" min="1" />
-                      <button class="btn-quantity plus" data-product-id="${product.id
-            }">+</button>
+                      <button class="btn-quantity minus" data-product-id="${
+                        product.id
+                      }">-</button>
+                      <input type="number" class="quantity-input" id="quantity-${
+                        product.id
+                      }" value="1" min="1" />
+                      <button class="btn-quantity plus" data-product-id="${
+                        product.id
+                      }">+</button>
                     </div>
                   </div>
                   <input
@@ -261,9 +270,9 @@ $(document).ready(function () {
                       id="product-${product.id}"
                       value="${product.id}"
                       data-product='${JSON.stringify({
-              ...product,
-              quantity: 1,
-            })}'
+                        ...product,
+                        quantity: 1,
+                      })}'
                       data-id_group='${id_group}'
                   />
                 </div>
@@ -277,8 +286,8 @@ $(document).ready(function () {
                 </div>
                 <div class="product-price">
                   ${parseFloat(product.price).toFixed(
-              2
-            )} €<span>PRIX PUBLIC</span>
+                    2
+                  )} €<span class="public-price">PRIX PUBLIC</span>
                 </div>
 
               </div>
@@ -324,7 +333,11 @@ $(document).ready(function () {
     // product.find(".product-count").text(newQuantity);
     product
       .find(".product-price")
-      .html(`${totalPrice.toFixed(2)} €<span>PRIX PUBLIC</span>`);
+      .html(
+        `${totalPrice.toFixed(
+          2
+        )} €<span class="public-price">PRIX PUBLIC</span>`
+      );
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
@@ -346,7 +359,11 @@ $(document).ready(function () {
     // product.find(".product-count").text(newQuantity);
     product
       .find(".product-price")
-      .html(`${totalPrice.toFixed(2)} €<span>PRIX PUBLIC</span>`);
+      .html(
+        `${totalPrice.toFixed(
+          2
+        )} €<span class="public-price">PRIX PUBLIC</span>`
+      );
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
@@ -411,7 +428,7 @@ $(document).ready(function () {
 
     // Hide the popup
     initProductActions();
-    saveSelectedProducts(selectedProducts);
+    saveSelectedProducts(productId, selectedProducts);
 
     $groupPopup.removeClass("visible");
   });
@@ -432,12 +449,13 @@ $(document).ready(function () {
                 <div class="group-products">
                   <!-- Products within the group -->
                   ${group.products
-              .map(
-                (product, index) =>
-                  `<div id="selected-product-${product.id
-                  }" class="product" data-product='${JSON.stringify(
-                    product
-                  )}'>
+                    .map(
+                      (product, index) =>
+                        `<div id="selected-product-${
+                          product.id
+                        }" class="product" data-product='${JSON.stringify(
+                          product
+                        )}'>
 
                           <!-- Product Information -->
                           <div class="product-infos">
@@ -447,29 +465,33 @@ $(document).ready(function () {
                               (Code: ${product.reference || "N/A"})
                             </div>
                             <div class="product-price">${parseFloat(
-                    product.price * product.quantity
-                  ).toFixed(2)} €</div>
+                              product.price * product.quantity
+                            ).toFixed(2)} €</div>
                           </div>
 
                           <!-- Product Actions -->
                           <div class="product-actions">
-                            <button class="btn-delete" data-product-id="${product.id
-                  }">
+                            <button class="btn-delete" data-product-id="${
+                              product.id
+                            }">
                               <i class-"fa fa-delete"></i>X
                             </button>
                             <div class="quantity-selector">
-                              <button class="btn-quantity minus" data-product-id="${product.id
-                  }">-</button>
-                              <input type="number" class="quantity-input" id="quantity-${product.id
-                  }" value="${product.quantity}" min="1" />
-                              <button class="btn-quantity plus" data-product-id="${product.id
-                  }">+</button>
+                              <button class="btn-quantity minus" data-product-id="${
+                                product.id
+                              }">-</button>
+                              <input type="number" class="quantity-input" id="quantity-${
+                                product.id
+                              }" value="${product.quantity}" min="1" />
+                              <button class="btn-quantity plus" data-product-id="${
+                                product.id
+                              }">+</button>
                             </div>
                           </div>
 
                         </div>`
-              )
-              .join("")}
+                    )
+                    .join("")}
                 </div>
             </div>`
         )
@@ -535,7 +557,7 @@ $(document).ready(function () {
         )
         .toFixed(2)} €`
     );
-    saveSelectedProducts(selectedProducts);
+    saveSelectedProducts(productId, selectedProducts);
     // console.log("Updated selectedProducts:", selectedProducts); // Debugging output
   });
 
@@ -557,7 +579,7 @@ $(document).ready(function () {
         )
         .toFixed(2)} €`
     );
-    saveSelectedProducts(selectedProducts);
+    saveSelectedProducts(productId, selectedProducts);
   });
 
   // Handle confirmation of selected products
@@ -639,7 +661,7 @@ $(document).ready(function () {
           $(this).remove(); // Remove the message after fading out
         });
 
-      clearSelectedProducts();
+      // clearSelectedProducts(productId);
 
       window.location.href = redirectUrl;
 

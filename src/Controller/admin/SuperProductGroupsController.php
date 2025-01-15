@@ -35,6 +35,7 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
     // Handle uploaded files for group images
     $groups = $data['groups'];
+
     foreach ($groups as $key => $group) {
       // Fetch the uploaded file from $request->files
       $uploadedFile = $request->files->get("group_form")['groups'][$key]['group_image'] ?? null;
@@ -60,12 +61,15 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
   private function saveOrUpdateGroups(array $groups, int $superProductId): void
   {
 
+
     foreach ($groups as $groupData) {
       $groupId = $groupData['group_id'] ?? null;
       $groupName = $groupData['group_name'];
-      $groupOrder = $groupData['group_order'];
+      $groupOrder = $groupData['group_order'] ?? 0;
       $imagePath = $groupData['group_image'] ?? null;
       $groupProducts = $groupData['group_products'] ?? [];
+
+
 
       // $imagePath = $groupImage instanceof UploadedFile ? $this->uploadImage($groupImage) : null;
       $groupId = $this->saveOrUpdateGroup($groupId, $groupName, $imagePath, $groupOrder, $superProductId);
@@ -113,6 +117,7 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
       return $groupId;
     }
+   
 
     $db->insert('product_group', [
       'id_super_product' => (int)$superProductId,

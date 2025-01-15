@@ -277,6 +277,9 @@ class SuperProductGroups extends Module
 
     // Process results into a structured format
     $groups = [];
+    // echo "<pre>";
+    // print_r($result);
+    // die;
     foreach ($result as $row) {
       if (!isset($groups[$row['id_group']])) {
         $groups[$row['id_group']] = [

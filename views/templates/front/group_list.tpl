@@ -1,4 +1,4 @@
-<div id="super-product-groups">
+<div id="super-product-groups" class="super-product-groups isLogged_{$logged|intval}">
 
   <div id="list-super-product-groups">
 
@@ -97,7 +97,7 @@
 
     <div class="side-popup-header">
 
-      <div class="notice">Décocher produit : suppression du panier et la ligne s'enlève</div>
+      {* <div class="notice">Décocher produit : suppression du panier et la ligne s'enlève</div> *}
       <div class="title">
         Valider ma sélection
         <div class="blue"><strong>{$product.name}</strong></div>
@@ -136,7 +136,7 @@
     </div>
 
     <div class="side-popup-footer">
-      <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Voir le panier</button>
+      <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Ajouter le panier</button>
       <button type="button" class="custom-button order js-add-confirmed-selection-to-cart">Commander</button>
     </div>
 

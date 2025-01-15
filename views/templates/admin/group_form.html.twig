@@ -9,25 +9,24 @@
 	{{ form_errors(form) }}
 
 	<div id="group-rows" data-prototype="
-						    <div class='group-entry mb-3'>
-						        <div class='row align-items-center'>
-						            <div class='col-md-3'>
-						                {{ form_widget(form.groups.vars.prototype['group_name'], {'attr': {'class': 'form-control'}})|e('html_attr') }}
-						            </div>
-						            <div class='col-md-4'>
-						                {{ form_widget(form.groups.vars.prototype['group_image'], {'attr': {'class': 'form-control-file'}})|e('html_attr') }}
-						            </div>
-						            <div class='col-md-3'>
-						                {{ form_widget(form.groups.vars.prototype['group_products'], {'attr': {'class': 'js-product-search form-control'}})|e('html_attr') }}
-						            </div>
-						        </div>
-						    </div>
-						">
+												    <div class='group-entry mb-3'>
+												        <div class='row align-items-center'>
+												            <div class='col-md-3'>
+												                {{ form_widget(form.groups.vars.prototype['group_name'], {'attr': {'class': 'form-control'}})|e('html_attr') }}
+												            </div>
+												            <div class='col-md-4'>
+												                {{ form_widget(form.groups.vars.prototype['group_image'], {'attr': {'class': 'form-control-file'}})|e('html_attr') }}
+												            </div>
+												            <div class='col-md-3'>
+												                {{ form_widget(form.groups.vars.prototype['group_products'], {'attr': {'class': 'js-product-search form-control'}})|e('html_attr') }}
+												            </div>
+												        </div>
+												    </div>
+												">
 
 		<div id="category-list">
 			{% for group in form.groups %}
-
-				<div class="row align-items-center group-entry mb-3 list-group-item" data-category-order="{{ group.vars['value']['group_order']  }}">
+				<div class="row align-items-center group-entry mb-3 list-group-item" data-category-order="{{ group.vars['value']['group_order'] }}">
 					{{ form_widget(group.group_id) }}
 					{{ form_widget(group.group_order) }}
 					<div class="col-md-1">
@@ -62,59 +61,60 @@
 					<div class="col-md-2">
 						<button type="button" class="btn btn-danger js-delete-group w-full" data-group-id="{{ group.group_id.vars.value }}">Supprimer</button>
 					</div>
-			</div>
+				</div>
 			{% endfor %}
-	</div>
-
-	<div class="row mt-4">
-		<div class="col-md-10 text-start">
-			<button type="button" id="add-row" class="btn btn-secondary">Ajouter un groupe</button>
-		</div>
-		<div class="col-md-2 text-end">
-			<button type="submit" id="save-form" class="btn btn-primary w-full">Enregistrer</button>
-		</div>
-	</div>
-
-	{# {{ form_end(form) }} #}
-
-	<div id="message-container" class="mt-3"></div>
-</div>
 
 
-<!-- Popup -->
-<div id="product-popup" class="popup-overlay">
-	<div class="popup-content">
-		<div class="popup-header">
-			<h3>Ajouter des Produits</h3>
-			<button type="button" class="btn-close" id="close-popup" aria-label="Close"></button>
+			<div class="row mt-4">
+				<div class="col-md-10 text-start">
+					<button type="button" id="add-row" class="btn btn-secondary">Ajouter un groupe</button>
+				</div>
+				<div class="col-md-2 text-end">
+					<button type="submit" id="save-form" class="btn btn-primary w-full">Enregistrer</button>
+				</div>
+			</div>
+
+			{# {{ form_end(form) }} #}
+
+			<div id="message-container" class="mt-3"></div>
 		</div>
 
-		<!-- Search and Actions -->
-		<div class="popup-actions">
-			<div
-				class="action-buttons">
-				{# <button type="button" class="btn btn-secondary js-export-products">Exporter</button>
-					<button type="button" class="btn btn-secondary">Importer</button> #}
-				<button type="button" class="btn btn-danger js-delete-all-products">Supprimer tous les produits</button>
+
+		<!-- Popup -->
+		<div id="product-popup" class="popup-overlay">
+			<div class="popup-content">
+				<div class="popup-header">
+					<h3>Ajouter des Produits</h3>
+					<button type="button" class="btn-close" id="close-popup" aria-label="Close"></button>
+				</div>
+
+				<!-- Search and Actions -->
+				<div class="popup-actions">
+					<div
+						class="action-buttons">
+						{# <button type="button" class="btn btn-secondary js-export-products">Exporter</button>
+																	<button type="button" class="btn btn-secondary">Importer</button> #}
+						<button type="button" class="btn btn-danger js-delete-all-products">Supprimer tous les produits</button>
+					</div>
+				</div>
+
+
+				<!-- Add Product -->
+				<div class="add-product">
+					<input type="text" id="add-product-name" class="js-add-product-name form-control mb-2" placeholder="Nom du produit" autocomplete="off"/>
+					<ul id="autocomplete-dropdown" class="dropdown-menu" style="display: none;"></ul>
+					<button type="button" class="btn btn-primary" id="add-product">Ajouter</button>
+				</div>
+
+				<ul
+					id="product-list" class="list-group mt-3"><!-- Dynamically added products will appear here -->
+				</ul>
+
+				<!-- Save Button -->
+				<div class="popup-footer mt-3 text-end">
+					<button type="button" class="btn btn-success" id="save-products">Enregistrer</button>
+				</div>
+
 			</div>
 		</div>
-
-
-		<!-- Add Product -->
-		<div class="add-product">
-			<input type="text" id="add-product-name" class="js-add-product-name form-control mb-2" placeholder="Nom du produit" autocomplete="off"/>
-			<ul id="autocomplete-dropdown" class="dropdown-menu" style="display: none;"></ul>
-			<button type="button" class="btn btn-primary" id="add-product">Ajouter</button>
-		</div>
-
-		<ul
-			id="product-list" class="list-group mt-3"><!-- Dynamically added products will appear here -->
-		</ul>
-
-		<!-- Save Button -->
-		<div class="popup-footer mt-3 text-end">
-			<button type="button" class="btn btn-success" id="save-products">Enregistrer</button>
-		</div>
-
 	</div>
-</div>

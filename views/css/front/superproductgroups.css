@@ -562,7 +562,9 @@
   margin: 0 1px;
 }
 
-
+.isLogged_0 .public-price {
+  display: none;
+}
 
 /* Hide details elements */
 .has-product-groups .product-information {
