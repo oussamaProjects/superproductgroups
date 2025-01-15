@@ -125,6 +125,7 @@ class SuperProductGroups extends Module
       $formData['groups'][] = [
         'group_id' => $group['id'], // Include group ID
         'group_name' => $group['name'],
+        'group_order' => $group['group_order'],
         'group_image' => $group['image'] ?? null, // Use the image path or null
         'group_products' => array_column($group['products'], 'id'), // Extract product IDs
       ];
@@ -208,13 +209,14 @@ class SuperProductGroups extends Module
     return $groups;
   }
 
-  private function getThisProductGroupsWithProducts(int $productId)
+  public function getThisProductGroupsWithProducts(int $productId)
   {
     $sql = new \DbQuery();
     $sql->select('
           pg.id_group AS id_group,
           pg.name AS group_name,
           pg.image AS group_image,
+          pg.group_order AS group_order,
           p.id_product AS product_id,
           pl.name AS product_name,
           p.reference AS reference,
@@ -262,6 +264,7 @@ class SuperProductGroups extends Module
     );
 
     $sql->where('pg.id_super_product = ' . (int)$productId);
+    $sql->orderBy('pg.group_order ASC');
 
     $result = \Db::getInstance()->executeS($sql);
 
@@ -280,6 +283,7 @@ class SuperProductGroups extends Module
           'id' => $row['id_group'],
           'name' => $row['group_name'],
           'image' => $row['group_image'],
+          'group_order' => $row['group_order'],
           'products' => [],
         ];
       }

@@ -11,9 +11,50 @@ $(document).ready(function () {
   const $product_actions = $(".js-product-actions");
   const $add_to_cart = $(".js-product-actions js-product-add-to-cart");
 
-  $product_prices.hide();
+  // $product_prices.hide();
   // $product_actions.hide();
-  $add_to_cart.hide();
+  // $add_to_cart.hide();
+
+  const bodyClass = $("body").attr("class");
+  const productIdMatch = bodyClass.match(/product-id-(\d+)/);
+
+  if (productIdMatch && productIdMatch[1]) {
+    const productId = productIdMatch[1];
+    // console.log("Extracted Product ID:", productId);
+
+    // Proceed with your logic using productId
+    checkProductGroups(productId);
+  } else {
+    console.warn("No product ID found in body class.");
+  }
+
+  function checkProductGroups(productId) {
+
+    const ajaxUrl =
+      prestashop.urls.base_url +
+      "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=CheckProductHasGroups";
+      // console.log("Checking products:", ajaxUrl);
+
+    $.ajax({
+      url: ajaxUrl,
+      type: "POST",
+      data: { id_product: productId },
+      success: function (response) {
+        const res = JSON.parse(response);
+        // console.log("res", res);
+
+        if (res.status === "success" && res.hasGroups) {
+          $("body").addClass("has-product-groups");
+        } else {
+          $("body").removeClass("has-product-groups");
+        }
+      },
+      error: function (xhr) {
+        console.error("AJAX Error:", xhr.responseText);
+      },
+    });
+  }
+
 
   let selectedProducts = [];
   let groupedProducts = [];
@@ -23,7 +64,7 @@ $(document).ready(function () {
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=SaveSelectedProducts";
 
-    console.log("Saving products to:", ajaxUrl);
+    // console.log("Saving products to:", ajaxUrl);
 
     $.ajax({
       url: ajaxUrl,
@@ -32,7 +73,7 @@ $(document).ready(function () {
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
-          console.log("Products saved successfully:", res.message);
+          // console.log("Products saved successfully:", res.message);
         } else {
           console.error("Error saving products:", res.message);
         }
@@ -48,7 +89,7 @@ $(document).ready(function () {
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=GetSelectedProducts";
 
-    console.log("Fetching products from:", ajaxUrl);
+    // console.log("Fetching products from:", ajaxUrl);
 
     $.ajax({
       url: ajaxUrl,
@@ -56,7 +97,7 @@ $(document).ready(function () {
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
-          console.log("Loaded selected products:", res.selectedProducts);
+          // console.log("Loaded selected products:", res.selectedProducts);
           selectedProducts = res.selectedProducts;
 
           initProductActions();
@@ -81,7 +122,7 @@ $(document).ready(function () {
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
-          console.log("Selected products cleared:", res.message);
+          // console.log("Selected products cleared:", res.message);
         } else {
           console.error("Error clearing selected products:", res.message);
         }
@@ -138,14 +179,14 @@ $(document).ready(function () {
             `<div class="group">
                   <div class="group-name">${group.group_name}</div>
                   <div class="group-total-price">${group.total_price.toFixed(
-                    2
-                  )} €</div>
+              2
+            )} €</div>
                    <span class="js-view-selected-products">Voir Produits Sélectionnés</span>
                 <div class="hidden group-products">
                   ${group.products
-                    .map(
-                      (product, index) =>
-                        `<div class="product-check">
+              .map(
+                (product, index) =>
+                  `<div class="product-check">
                             <div class="product-infos">
                               <div class="product-number">${index + 1}</div>
                               <div class="product-label">
@@ -153,12 +194,12 @@ $(document).ready(function () {
                                  (Code: ${product.reference || "N/A"})
                               </div>
                               <div class="product-price">${parseFloat(
-                                product.price * product.quantity
-                              ).toFixed(2)} €</div>
+                    product.price * product.quantity
+                  ).toFixed(2)} €</div>
                             </div>
                           </div>`
-                    )
-                    .join("")}
+              )
+              .join("")}
                 </div>
             </div>
             `
@@ -189,7 +230,7 @@ $(document).ready(function () {
     const products = $(this).data("products");
     const id_group = $(this).data("id_group");
     const name_group = $(this).data("name_group");
-    console.log("products", products);
+    // console.log("products", products);
     $(".selected-group-name").html(name_group);
 
     // Populate the popup with products
@@ -206,15 +247,12 @@ $(document).ready(function () {
                 <div class="product-actions-container">
                   <div class="product-actions">
                     <div class="quantity-selector">
-                      <button class="btn-quantity minus" data-product-id="${
-                        product.id
-                      }">-</button>
-                      <input type="number" class="quantity-input" id="quantity-${
-                        product.id
-                      }" value="1" min="1" />
-                      <button class="btn-quantity plus" data-product-id="${
-                        product.id
-                      }">+</button>
+                      <button class="btn-quantity minus" data-product-id="${product.id
+            }">-</button>
+                      <input type="number" class="quantity-input" id="quantity-${product.id
+            }" value="1" min="1" />
+                      <button class="btn-quantity plus" data-product-id="${product.id
+            }">+</button>
                     </div>
                   </div>
                   <input
@@ -223,9 +261,9 @@ $(document).ready(function () {
                       id="product-${product.id}"
                       value="${product.id}"
                       data-product='${JSON.stringify({
-                        ...product,
-                        quantity: 1,
-                      })}'
+              ...product,
+              quantity: 1,
+            })}'
                       data-id_group='${id_group}'
                   />
                 </div>
@@ -239,8 +277,8 @@ $(document).ready(function () {
                 </div>
                 <div class="product-price">
                   ${parseFloat(product.price).toFixed(
-                    2
-                  )} €<span>PRIX PUBLIC</span>
+              2
+            )} €<span>PRIX PUBLIC</span>
                 </div>
 
               </div>
@@ -327,7 +365,7 @@ $(document).ready(function () {
     const searchQuery = $(inputElement).val().toLowerCase();
     const $productItems = $groupProductsContainer.find(".custom-product");
 
-    console.log("$productItems", $productItems);
+    // console.log("$productItems", $productItems);
 
     $productItems.each(function () {
       const $item = $(this);
@@ -369,7 +407,7 @@ $(document).ready(function () {
       }
     });
 
-    console.log("Selected Products:", selectedProducts); // Replace with your logic
+    // console.log("Selected Products:", selectedProducts); // Replace with your logic
 
     // Hide the popup
     initProductActions();
@@ -382,7 +420,7 @@ $(document).ready(function () {
   $(document).on("click", ".js-view-selected-products", function (e) {
     e.preventDefault();
 
-    console.log("Selected Groups:", Object.values(groupedProducts)); // Replace with your logic
+    // console.log("Selected Groups:", Object.values(groupedProducts)); // Replace with your logic
 
     if (groupedProducts) {
       const selectedHtml = Object.values(groupedProducts)
@@ -394,13 +432,12 @@ $(document).ready(function () {
                 <div class="group-products">
                   <!-- Products within the group -->
                   ${group.products
-                    .map(
-                      (product, index) =>
-                        `<div id="selected-product-${
-                          product.id
-                        }" class="product" data-product='${JSON.stringify(
-                          product
-                        )}'>
+              .map(
+                (product, index) =>
+                  `<div id="selected-product-${product.id
+                  }" class="product" data-product='${JSON.stringify(
+                    product
+                  )}'>
 
                           <!-- Product Information -->
                           <div class="product-infos">
@@ -410,33 +447,29 @@ $(document).ready(function () {
                               (Code: ${product.reference || "N/A"})
                             </div>
                             <div class="product-price">${parseFloat(
-                              product.price * product.quantity
-                            ).toFixed(2)} €</div>
+                    product.price * product.quantity
+                  ).toFixed(2)} €</div>
                           </div>
 
                           <!-- Product Actions -->
                           <div class="product-actions">
-                            <button class="btn-delete" data-product-id="${
-                              product.id
-                            }">
+                            <button class="btn-delete" data-product-id="${product.id
+                  }">
                               <i class-"fa fa-delete"></i>X
                             </button>
                             <div class="quantity-selector">
-                              <button class="btn-quantity minus" data-product-id="${
-                                product.id
-                              }">-</button>
-                              <input type="number" class="quantity-input" id="quantity-${
-                                product.id
-                              }" value="${product.quantity}" min="1" />
-                              <button class="btn-quantity plus" data-product-id="${
-                                product.id
-                              }">+</button>
+                              <button class="btn-quantity minus" data-product-id="${product.id
+                  }">-</button>
+                              <input type="number" class="quantity-input" id="quantity-${product.id
+                  }" value="${product.quantity}" min="1" />
+                              <button class="btn-quantity plus" data-product-id="${product.id
+                  }">+</button>
                             </div>
                           </div>
 
                         </div>`
-                    )
-                    .join("")}
+              )
+              .join("")}
                 </div>
             </div>`
         )
@@ -465,11 +498,11 @@ $(document).ready(function () {
 
     // Update the input field
     input.val(newQuantity);
-    console.log("productId", productId);
+    // console.log("productId", productId);
 
     // Find the product in the `selectedProducts` array and update its quantity
     const productIndex = selectedProducts.findIndex((p) => p.id == productId);
-    console.log("productIndex", productIndex);
+    // console.log("productIndex", productIndex);
 
     if (productIndex !== -1) {
       selectedProducts[productIndex].quantity = newQuantity;
@@ -503,7 +536,7 @@ $(document).ready(function () {
         .toFixed(2)} €`
     );
     saveSelectedProducts(selectedProducts);
-    console.log("Updated selectedProducts:", selectedProducts); // Debugging output
+    // console.log("Updated selectedProducts:", selectedProducts); // Debugging output
   });
 
   $selectedProductsPopup.on("click", ".btn-delete", function (e) {

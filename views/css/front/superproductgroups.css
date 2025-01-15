@@ -1,6 +1,8 @@
 .hidden {
   display: none;
-} /* General Layout */
+}
+
+/* General Layout */
 
 /* Group Item Styles */
 .list-super-product-groups {
@@ -97,8 +99,8 @@
   line-height: normal;
   margin: 6px 0;
 }
-.selected-groups-list .group .group-name {
-}
+
+.selected-groups-list .group .group-name {}
 
 .selected-groups-list .group .group-total-price {
   margin-left: auto;
@@ -283,9 +285,11 @@
 .custom-product .product-infos {
   height: 94px;
 }
+
 .custom-product .product-infos .product-price {
   margin-top: auto;
 }
+
 .product-infos {
   display: flex;
   flex-direction: column;
@@ -351,8 +355,7 @@
   background-color: #56c072;
 }
 
-.side-popup-after-body {
-}
+.side-popup-after-body {}
 
 .side-popup-after-body .selected-groups-list .group {
   color: #000;
@@ -402,7 +405,8 @@
   padding: 0px !important;
   width: 100%;
   height: 34px !important;
-  cursor: pointer !important;;
+  cursor: pointer !important;
+  ;
   flex-shrink: 0;
   border-radius: 20px;
   background: #1d1060;
@@ -486,6 +490,7 @@
   justify-content: flex-start;
   align-items: center;
 }
+
 #selected-products-list .group .group-products .product .product-actions .btn-delete {
   background: transparent;
   border: none;
@@ -527,6 +532,7 @@
   right: 0;
   top: 0;
 }
+
 /* Quantity buttons styling */
 #super-product-groups .quantity-selector {
   display: flex;
@@ -549,8 +555,28 @@
   border: none;
   outline: none;
 }
+
 #super-product-groups .quantity-input {
   width: 30px;
   text-align: center;
   margin: 0 1px;
+}
+
+
+
+/* Hide details elements */
+.has-product-groups .product-information {
+  margin-top: 0px;
+}
+.has-product-groups .product-information .product-description,
+.has-product-groups .product-information .tdrealtimevisitor,
+.has-product-groups .product-information .js-product-images-modal,
+.has-product-groups .product-information .js-product-prices,
+.has-product-groups .product-information .js-product-actions,
+.has-product-groups .product-information .js-product-additional-info .tdstockinfo,
+.has-product-groups .product-information .js-product-additional-info .social-sharing,
+.has-product-groups .product-information .product-payment-logo,
+.has-product-groups .product-information .js-product-meta,
+.has-product-groups .product-information .blockreassurance_product {
+  display: none;
 }

@@ -1,90 +1,90 @@
 $(document).ready(function () {
-  let index = $("#group-rows .group-entry").length; // Initial index for new rows
-  console.log("index", index);
+	let index = $("#group-rows .group-entry").length; // Initial index for new rows
+	console.log("index", index);
 
-  // Add new row dynamically
-  $("#add-row").on("click", function () {
-    const prototype = $("#group-rows").data("prototype");
-    const newFormRow = $(prototype.replace(/__name__/g, index));
-    index++;
+	// Add new row dynamically
+	$("#add-row").on("click", function () {
+		const prototype = $("#group-rows").data("prototype");
+		const newFormRow = $(prototype.replace(/__name__/g, index));
+		index++;
 
-    // Append the new row to the group rows container
-    $("#group-rows").append(newFormRow);
+		// Append the new row to the group rows container
+		$("#group-rows").append(newFormRow);
 
-    // Debug: Ensure the new row and select element exist
-    console.log("Added new row:", newFormRow);
-    console.log("Select element:", newFormRow.find(".js-product-search"));
+		// Debug: Ensure the new row and select element exist
+		console.log("Added new row:", newFormRow);
+		console.log("Select element:", newFormRow.find(".js-product-search"));
 
-    // Reinitialize Select2 for the newly added row
-    newFormRow.find(".js-product-search").select2({
-      placeholder: "Type to search for products",
-      minimumInputLength: 2,
-      ajax: {
-        url: `${adminBaseUrl}/modules/superproductgroups/ajax-products`, // AJAX endpoint
-        dataType: "json",
-        delay: 250,
-        data: function (params) {
-          return {
-            q: params.term, // Search term
-            _token: adminToken, // Include CSRF token
-          };
-        },
-        processResults: function (data) {
-          return {
-            results: data.results.map(function (product) {
-              return {
-                id: product.id,
-                text: product.text,
-              };
-            }),
-          };
-        },
-      },
-      templateResult: function (product) {
-        if (!product.id) {
-          return product.text;
-        }
-        return $("<span>" + product.text + "</span>");
-      },
-      templateSelection: function (product) {
-        return product.text || product.id;
-      },
-      allowClear: true, // Enable clearing the selection
-    });
-  });
+		// Reinitialize Select2 for the newly added row
+		newFormRow.find(".js-product-search").select2({
+			placeholder: "Type to search for products",
+			minimumInputLength: 2,
+			ajax: {
+				url: `${adminBaseUrl}/modules/superproductgroups/ajax-products`, // AJAX endpoint
+				dataType: "json",
+				delay: 250,
+				data: function (params) {
+					return {
+						q: params.term, // Search term
+						_token: adminToken, // Include CSRF token
+					};
+				},
+				processResults: function (data) {
+					return {
+						results: data.results.map(function (product) {
+							return {
+								id: product.id,
+								text: product.text,
+							};
+						}),
+					};
+				},
+			},
+			templateResult: function (product) {
+				if (!product.id) {
+					return product.text;
+				}
+				return $("<span>" + product.text + "</span>");
+			},
+			templateSelection: function (product) {
+				return product.text || product.id;
+			},
+			allowClear: true, // Enable clearing the selection
+		});
+	});
 
-  // AJAX form submission
-  $("#save-form").on("click", function (e) {
-    e.preventDefault();
-    // Serialize form data
-    const actionUrl = $("#group-form").data("action"); // Get the action URL from the data-action attribute on #group-form
+	// AJAX form submission
+	$("#save-form").on("click", function (e) {
+		e.preventDefault();
+		// Serialize form data
+		const actionUrl = $("#group-form").data("action"); // Get the action URL from the data-action attribute on #group-form
 
-    const formData = new FormData();
-    // Loop through each input in #group-form and append it to formData
-    $("#group-form")
-      .find("input, select, textarea")
-      .each(function () {
-        const input = $(this);
-        const name = input.attr("name");
-        const value = input.val();
+		const formData = new FormData();
+		// Loop through each input in #group-form and append it to formData
+		$("#group-form")
+			.find("input, select, textarea")
+			.each(function () {
+				const input = $(this);
+				const name = input.attr("name");
+				const value = input.val();
 
-        if (input.is("select[multiple]")) {
-          // Handle multiple selections
-          if (value) {
-            value.forEach((val) => formData.append(name, val));
-          }
-        } else if (input.attr("type") === "file" && input[0].files.length > 0) {
-          formData.append(name, input[0].files[0]);
-        } else {
-          formData.append(name, value);
-        }
-      });
+				if (input.is("select[multiple]")) {
+					// Handle multiple selections
+					if (value) {
+						value.forEach((val) => formData.append(name, val));
+					}
+				} else if (input.attr("type") === "file" && input[0].files.length > 0) {
+					formData.append(name, input[0].files[0]);
+				} else {
+					formData.append(name, value);
+				}
+			});
 
-      console.log("formData", formData);
-      
+			console.log("formData", formData);
 
-    $.ajax({
-      url: actionUrl, // Use the form's action attribute
+
+		$.ajax({
+			url: actionUrl, // Use the form's action attribute
       type: "POST",
       data: formData,
       processData: false, // Required for FormData
@@ -161,6 +161,25 @@ $(document).ready(function () {
     },
   });
 
+  const $categoryList = $("#category-list");
+  // Make the product list sortable
+  $categoryList.sortable({
+    placeholder: "sortable-placeholder",
+    update: function (event, ui) {
+      updateCategoryOrder();
+    },
+  });
+
+  function updateCategoryOrder() {
+    $("#category-list .list-group-item").each(function (index) {
+      console.log("index", index);
+      const $item = $(this);
+      // $item.find(".category-order").text(index + 1); // Update the category order display
+      $item.find(".js-group-order").val(index + 1); // Update the product order display
+      $item.data("category-order", index + 1); // Optionally update an order attribute
+    });
+  }
+
   function updateProductOrder() {
     $("#product-list .list-group-item").each(function (index) {
       const $item = $(this);
@@ -175,320 +194,320 @@ $(document).ready(function () {
     let groupProducts = $(this).data("group-products");
 
     // Check if it's already an array
-    if (Array.isArray(groupProducts)) {
-      // Use it directly if it's an array
+		if (Array.isArray(groupProducts)) {
+			// Use it directly if it's an array
       console.log("Group Products is an array:", groupProducts);
     } else if (typeof groupProducts === "string" && groupProducts.length > 0) {
       // If it's a non-empty string, split it by commas
-      groupProducts = groupProducts.split(",");
-      console.log(
-        "Group Products was a string, converted to array:",
-        groupProducts
-      );
-    } else {
-      // Handle empty or invalid cases
-      groupProducts = [];
-      console.log("Group Products is empty or invalid.");
-    }
+			groupProducts = groupProducts.split(",");
+			console.log(
+				"Group Products was a string, converted to array:",
+				groupProducts
+			);
+		} else {
+			// Handle empty or invalid cases
+			groupProducts = [];
+			console.log("Group Products is empty or invalid.");
+		}
 
-    console.log("Opening product popup for group ID:", currentGroupId);
-    // Fetch the product list via AJAX
-    $.ajax({
-      url: `${adminBaseUrl}/modules/superproductgroups/ajax-group-products`,
-      type: "GET",
-      data: {
-        group_id: currentGroupId,
-        _token: adminToken, // Include CSRF token
-      },
-      success: function (response) {
-        // Show the popup
-        $productPopup.modal("show");
-        // Populate the popup with products
-        if (!response.products || response.products.length === 0) {
-          $productList.html("No products found.");
-          return;
-        }
-        console.log("Fetched products:", response.products);
-        const productsHtml = response.products
-          .map(
-            (product, index) => `
-            <li class="list-group-item d-flex align-items-center" data-product-order="${
+		console.log("Opening product popup for group ID:", currentGroupId);
+		// Fetch the product list via AJAX
+		$.ajax({
+			url: `${adminBaseUrl}/modules/superproductgroups/ajax-group-products`,
+			type: "GET",
+			data: {
+				group_id: currentGroupId,
+				_token: adminToken, // Include CSRF token
+			},
+			success: function (response) {
+				// Show the popup
+				$productPopup.modal("show");
+				// Populate the popup with products
+				if (!response.products || response.products.length === 0) {
+					$productList.html("No products found.");
+					return;
+				}
+				console.log("Fetched products:", response.products);
+				const productsHtml = response.products
+					.map(
+						(product, index) => `
+						<li class="list-group-item d-flex align-items-center" data-product-order="${
               index + 1
             }" data-id_group="${currentGroupId}" data-id_product="${
               product.id_product
             }">
-              <span class="sort-icon me-2" style="cursor: move;margin-right: 8px;">
-                <i class="fas fa-sort"></i> <!-- Drag/Sort icon -->
-              </span>
-              <span class="product-order">${index + 1}</span>
-              <span class="product-info">${product.name}</span>
-              <button class="btn btn-danger btn-sm ms-auto js-delete-product" data-id_group="${currentGroupId}" data-id_product="${
+							<span class="sort-icon me-2" style="cursor: move;margin-right: 8px;">
+								<i class="fas fa-sort"></i> <!-- Drag/Sort icon -->
+							</span>
+							<span class="product-order">${index + 1}</span>
+							<span class="product-info">${product.name}</span>
+							<button class="btn btn-danger btn-sm ms-auto js-delete-product" data-id_group="${currentGroupId}" data-id_product="${
               product.id_product
             }">Supprimer</button>
-            </li>`
-          )
-          .join("");
-        $productList.html(productsHtml);
+						</li>`
+					)
+					.join("");
+				$productList.html(productsHtml);
 
-        console.log("Products HTML:", productsHtml);
-      },
-    });
-  });
+				console.log("Products HTML:", productsHtml);
+			},
+		});
+	});
 
-  const $addProductInput = $("#add-product-name"); // Input field for product search
-  const $addProductButton = $("#add-product"); // Add product button
+	const $addProductInput = $("#add-product-name"); // Input field for product search
+	const $addProductButton = $("#add-product"); // Add product button
 
-  let autocompleteResults = []; // Store autocomplete results for selection
+	let autocompleteResults = []; // Store autocomplete results for selection
 
-  // Autocomplete logic
-  $addProductInput.on("input", function () {
-    const query = $(this).val().trim();
+	// Autocomplete logic
+	$addProductInput.on("input", function () {
+		const query = $(this).val().trim();
 
-    if (query.length >= 3) {
-      // Fetch matching products via AJAX
-      $.ajax({
-        url: `${adminBaseUrl}/modules/superproductgroups/ajax-products`,
-        type: "GET",
-        dataType: "json",
-        data: {
-          q: query,
-          _token: adminToken,
-        },
-        success: function (data) {
-          console.log("Received autocomplete results:", data);
+		if (query.length >= 3) {
+			// Fetch matching products via AJAX
+			$.ajax({
+				url: `${adminBaseUrl}/modules/superproductgroups/ajax-products`,
+				type: "GET",
+				dataType: "json",
+				data: {
+					q: query,
+					_token: adminToken,
+				},
+				success: function (data) {
+					console.log("Received autocomplete results:", data);
 
-          autocompleteResults = data.results; // Update autocomplete results
-          console.log("Autocomplete results:", autocompleteResults);
+					autocompleteResults = data.results; // Update autocomplete results
+					console.log("Autocomplete results:", autocompleteResults);
 
-          const autocompleteHtml = autocompleteResults
-            .map(
-              (product) =>
-                `<li class="dropdown-item" data-product-id="${product.id}" data-product-name="${product.text}">
-                    ${product.text}
-                  </li>`
-            )
-            .join("");
+					const autocompleteHtml = autocompleteResults
+						.map(
+							(product) =>
+								`<li class="dropdown-item" data-product-id="${product.id}" data-product-name="${product.text}">
+									${product.text}
+									</li>`
+						)
+						.join("");
 
-          // Display autocomplete dropdown
-          $("#autocomplete-dropdown").html(autocompleteHtml).show();
-        },
-        error: function () {
-          console.error("Failed to fetch autocomplete results.");
-        },
-      });
-    } else {
-      $("#autocomplete-dropdown").hide(); // Hide dropdown if query is too short
-    }
-  });
+					// Display autocomplete dropdown
+					$("#autocomplete-dropdown").html(autocompleteHtml).show();
+				},
+				error: function () {
+					console.error("Failed to fetch autocomplete results.");
+				},
+			});
+		} else {
+			$("#autocomplete-dropdown").hide(); // Hide dropdown if query is too short
+		}
+	});
 
-  // Handle product selection from the dropdown
-  $(document).on("click", ".dropdown-item", function () {
-    const selectedProductId = $(this).data("product-id");
-    const selectedProductName = $(this).data("product-name");
+	// Handle product selection from the dropdown
+	$(document).on("click", ".dropdown-item", function () {
+		const selectedProductId = $(this).data("product-id");
+		const selectedProductName = $(this).data("product-name");
 
-    // Set the input value to the selected product name
-    $addProductInput.val(selectedProductName);
-    $addProductInput.data("selected-product-id", selectedProductId); // Store the selected product ID
-    $("#autocomplete-dropdown").hide(); // Hide the dropdown
-  });
+		// Set the input value to the selected product name
+		$addProductInput.val(selectedProductName);
+		$addProductInput.data("selected-product-id", selectedProductId); // Store the selected product ID
+		$("#autocomplete-dropdown").hide(); // Hide the dropdown
+	});
 
-  // Add selected product to the list
-  $addProductButton.on("click", function () {
-    const selectedProductId = $addProductInput.data("selected-product-id");
-    const selectedProductName = $addProductInput.val().trim();
+	// Add selected product to the list
+	$addProductButton.on("click", function () {
+		const selectedProductId = $addProductInput.data("selected-product-id");
+		const selectedProductName = $addProductInput.val().trim();
 
-    if (selectedProductId && selectedProductName) {
-      // Check if the product is already in the list
-      if (
-        $productList.find(`[data-product-id="${selectedProductId}"]`).length > 0
-      ) {
-        alert("Ce produit est déjà dans la liste.");
-        return;
-      }
+		if (selectedProductId && selectedProductName) {
+			// Check if the product is already in the list
+			if (
+				$productList.find(`[data-product-id="${selectedProductId}"]`).length > 0
+			) {
+				alert("Ce produit est déjà dans la liste.");
+				return;
+			}
 
-      // Calculate the next product order
-      const nextOrder = $productList.children().length + 1;
+			// Calculate the next product order
+			const nextOrder = $productList.children().length + 1;
 
-      // Add product to the list
-      const newProductHtml = `
-           <li class="list-group-item d-flex align-items-center" data-product-order="0" data-id_group="${currentGroupId}" data-id_product="${selectedProductId}">
-              <span class="sort-icon me-2" style="cursor: move;margin-right: 8px;">
-                <i class="fas fa-sort"></i> <!-- Drag/Sort icon -->
-              </span>
-              <span class="product-order">${nextOrder}</span>
-              <span class="product-info">	${selectedProductName}</span>
-              <button class="btn btn-danger btn-sm ms-auto js-delete-product" data-id_group="${currentGroupId}" data-id_product="${selectedProductId}">Supprimer</button>
-            </li>`;
-      $productList.append(newProductHtml);
+			// Add product to the list
+			const newProductHtml = `
+				<li class="list-group-item d-flex align-items-center" data-product-order="0" data-id_group="${currentGroupId}" data-id_product="${selectedProductId}">
+					<span class="sort-icon me-2" style="cursor: move;margin-right: 8px;">
+						<i class="fas fa-sort"></i> <!-- Drag/Sort icon -->
+					</span>
+					<span class="product-order">${nextOrder}</span>
+					<span class="product-info"> ${selectedProductName}</span>
+					<button class="btn btn-danger btn-sm ms-auto js-delete-product" data-id_group="${currentGroupId}" data-id_product="${selectedProductId}">Supprimer</button>
+					</li>`;
+			$productList.append(newProductHtml);
 
-      // Clear the input field
-      $addProductInput.val("").data("selected-product-id", null);
-    } else {
-      alert("Veuillez sélectionner un produit valide.");
-    }
-  });
+			// Clear the input field
+			$addProductInput.val("").data("selected-product-id", null);
+		} else {
+			alert("Veuillez sélectionner un produit valide.");
+		}
+	});
 
-  // Remove product from the list
-  $productList.on("click", ".remove-product", function () {
-    $(this).closest("li").remove();
-  });
+	// Remove product from the list
+	$productList.on("click", ".remove-product", function () {
+		$(this).closest("li").remove();
+	});
 
-  const $saveProductsButton = $("#save-products");
+	const $saveProductsButton = $("#save-products");
 
-  // Handle Save Products Button Click
-  $saveProductsButton.on("click", function () {
-    const selectedProducts = $productList
-      .find(".list-group-item")
-      .map(function () {
-        return {
-          id: $(this).data("id_product"),
-          order: $(this).data("product-order") || 0, // Include order information
-        };
-      })
-      .get();
+	// Handle Save Products Button Click
+	$saveProductsButton.on("click", function () {
+		const selectedProducts = $productList
+			.find(".list-group-item")
+			.map(function () {
+				return {
+					id: $(this).data("id_product"),
+					order: $(this).data("product-order") || 0, // Include order information
+				};
+			})
+			.get();
 
-    if (selectedProducts.length === 0) {
-      alert("Aucun produit sélectionné !");
-      return;
-    }
-    console.log("Selected products:", selectedProducts);
-    
-    // Example AJAX request to save products to the group
-    $.ajax({
-      url: `${adminBaseUrl}/modules/superproductgroups/save-group-products?_token=${adminToken}`, // Replace with actual endpoint
-      type: "POST",
-      data: {
-        groupId: currentGroupId, // Pass the group ID (store it when opening the popup)
-        // productIds: selectedProducts,
-        products: selectedProducts, // Pass the product IDs and their order
-        _token: adminToken, // CSRF token for security
-      },
+		if (selectedProducts.length === 0) {
+			alert("Aucun produit sélectionné !");
+			return;
+		}
+		console.log("Selected products:", selectedProducts);
 
-      success: function (response) {
-        console.log("Products saved successfully:", response);
+		// Example AJAX request to save products to the group
+		$.ajax({
+			url: `${adminBaseUrl}/modules/superproductgroups/save-group-products?_token=${adminToken}`, // Replace with actual endpoint
+			type: "POST",
+			data: {
+				groupId: currentGroupId, // Pass the group ID (store it when opening the popup)
+				// productIds: selectedProducts,
+				products: selectedProducts, // Pass the product IDs and their order
+				_token: adminToken, // CSRF token for security
+			},
 
-        alert(response.message);
-        $("#product-popup").removeClass("visible"); // Close the popup
-        window.location.reload();
-      },
-      error: function (xhr) {
-        alert("Erreur lors de l'enregistrement des produits.");
-      },
-    });
-  });
+			success: function (response) {
+				console.log("Products saved successfully:", response);
 
-  $(document).on("click", ".js-delete-product", function (e) {
-    e.preventDefault();
-    const $button = $(this);
-    const productId = $button.data("id_product");
-    const groupId = $button.data("id_group");
+				alert(response.message);
+				$("#product-popup").removeClass("visible"); // Close the popup
+				window.location.reload();
+			},
+			error: function (xhr) {
+				alert("Erreur lors de l'enregistrement des produits.");
+			},
+		});
+	});
 
-    // Confirmation dialog
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit du groupe ?")) {
-      return;
-    }
+	$(document).on("click", ".js-delete-product", function (e) {
+		e.preventDefault();
+		const $button = $(this);
+		const productId = $button.data("id_product");
+		const groupId = $button.data("id_group");
+
+		// Confirmation dialog
+		if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit du groupe ?")) {
+			return;
+		}
 console.log("productId", productId);
 
-    // AJAX call to delete the product from the group
-    $.ajax({
-      url: `${adminBaseUrl}/modules/superproductgroups/delete-group-product?_token=${adminToken}`,
-      type: "POST",
-      data: {
-        groupId: groupId,
-        productId: productId,
-      },
-      success: function (response) {
-        alert(response.message);
-        // Remove the product from the UI
-        $button.closest(".list-group-item").remove();
-      },
-      error: function (xhr) {
-        alert("Erreur lors de la suppression du produit.");
-      },
-    });
-  });
+	// AJAX call to delete the product from the group
+	$.ajax({
+		url: `${adminBaseUrl}/modules/superproductgroups/delete-group-product?_token=${adminToken}`,
+		type: "POST",
+		data: {
+			groupId: groupId,
+			productId: productId,
+		},
+		success: function (response) {
+			alert(response.message);
+			// Remove the product from the UI
+			$button.closest(".list-group-item").remove();
+		},
+		error: function (xhr) {
+			alert("Erreur lors de la suppression du produit.");
+		},
+	});
+	});
 
-  $(document).on("click", ".js-delete-group", function (e) {
-    e.preventDefault();
-    deleteButton = $(this);
-    groupId = deleteButton.data("group-id");
-    if (confirm("Are you sure you want to remove this row?")) {
-      $.ajax({
-        url: `${adminBaseUrl}/modules/superproductgroups/delete-group?_token=${adminToken}`,
-        type: "POST",
-        data: {
-          groupId: groupId, // Group ID to delete
-        },
-        success: function (response) {
-          alert(response.message);
-          // Optionally refresh the group list or update the UI
-          deleteButton.closest(".group-entry").remove();
-        },
-        error: function (xhr) {
-          alert("Erreur lors de la suppression du groupe.");
-        },
-      });
-    }
-  });
+	$(document).on("click", ".js-delete-group", function (e) {
+		e.preventDefault();
+		deleteButton = $(this);
+		groupId = deleteButton.data("group-id");
+		if (confirm("Are you sure you want to remove this row?")) {
+			$.ajax({
+				url: `${adminBaseUrl}/modules/superproductgroups/delete-group?_token=${adminToken}`,
+				type: "POST",
+				data: {
+					groupId: groupId, // Group ID to delete
+				},
+				success: function (response) {
+					alert(response.message);
+					// Optionally refresh the group list or update the UI
+					deleteButton.closest(".group-entry").remove();
+				},
+				error: function (xhr) {
+					alert("Erreur lors de la suppression du groupe.");
+				},
+			});
+		}
+	});
 
-  $(document).on("click", ".js-delete-all-products", function () {
-    // Confirmation dialog
-    if (
-      !confirm(
-        "Êtes-vous sûr de vouloir supprimer tous les produits de ce groupe ?"
-      )
-    ) {
-      return;
-    }
+	$(document).on("click", ".js-delete-all-products", function () {
+		// Confirmation dialog
+		if (
+			!confirm(
+				"Êtes-vous sûr de vouloir supprimer tous les produits de ce groupe ?"
+			)
+		) {
+			return;
+		}
 console.log("currentGroupId", currentGroupId);
 
-    // AJAX call to delete all products in the group
-    $.ajax({
-      url: `${adminBaseUrl}/modules/superproductgroups/delete-group-products?_token=${adminToken}`,
-      type: "POST",
-      data: {
-        groupId: currentGroupId,
-      },
-      success: function (response) {
-        alert(response.message);
-        // Remove all product items from the UI
-        $(`.list-group-item[data-id_group="${currentGroupId}"]`).remove();
-      },
-      error: function (xhr) {
-        alert("Erreur lors de la suppression de tous les produits.");
-      },
-    });
-  });
+	// AJAX call to delete all products in the group
+	$.ajax({
+		url: `${adminBaseUrl}/modules/superproductgroups/delete-group-products?_token=${adminToken}`,
+		type: "POST",
+		data: {
+			groupId: currentGroupId,
+		},
+		success: function (response) {
+			alert(response.message);
+			// Remove all product items from the UI
+			$(`.list-group-item[data-id_group="${currentGroupId}"]`).remove();
+		},
+		error: function (xhr) {
+			alert("Erreur lors de la suppression de tous les produits.");
+		},
+	});
+	});
 
-  $(document).on("click", ".js-export-products", function () {
-    console.log("Exporting products for group ID:", currentGroupId);
-    
-    // AJAX call to fetch group products
-    $.ajax({
-      url: `${adminBaseUrl}/modules/superproductgroups/export-group-products?_token=${adminToken}`,
-      type: "GET",
-      data: {
-        groupId: currentGroupId,
-      },
-      success: function (response) {
-        // Create a blob for the CSV file
-        const blob = new Blob([response], { type: "text/csv;charset=utf-8;" });
+	$(document).on("click", ".js-export-products", function () {
+		console.log("Exporting products for group ID:", currentGroupId);
 
-        // Generate a download link
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `group_${currentGroupId}_products.csv`);
-        document.body.appendChild(link);
-        link.click();
+		// AJAX call to fetch group products
+		$.ajax({
+			url: `${adminBaseUrl}/modules/superproductgroups/export-group-products?_token=${adminToken}`,
+			type: "GET",
+			data: {
+				groupId: currentGroupId,
+			},
+			success: function (response) {
+				// Create a blob for the CSV file
+				const blob = new Blob([response], { type: "text/csv;charset=utf-8;" });
 
-        // Clean up
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      },
-      error: function (xhr) {
-        alert("Erreur lors de l'exportation des produits.");
-      },
-    });
-  });
+				// Generate a download link
+				const link = document.createElement("a");
+				const url = URL.createObjectURL(blob);
+				link.setAttribute("href", url);
+				link.setAttribute("download", `group_${currentGroupId}_products.csv`);
+				document.body.appendChild(link);
+				link.click();
+
+				// Clean up
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			},
+			error: function (xhr) {
+				alert("Erreur lors de l'exportation des produits.");
+			},
+		});
+	});
 });

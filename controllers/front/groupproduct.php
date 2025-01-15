@@ -9,6 +9,10 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
 
     // Dispatch based on the action
     switch ($action) {
+      case 'CheckProductHasGroups':
+        $this->checkProductHasGroups();
+        break;
+
       case 'SaveSelectedProducts':
         $this->saveSelectedProducts();
         break;
@@ -25,6 +29,22 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
         die(json_encode(['status' => 'error', 'message' => 'Invalid action.']));
     }
   }
+
+  public function checkProductHasGroups()
+{
+    $productId = (int) Tools::getValue('id_product');
+
+    if (!$productId) {
+        die(json_encode(['status' => 'error', 'message' => 'No product ID provided.']));
+    }
+    $groups = $this->module->getThisProductGroupsWithProducts($productId);
+
+    if (!empty($groups)) {
+        die(json_encode(['status' => 'success', 'hasGroups' => true]));
+    }
+
+    die(json_encode(['status' => 'success', 'hasGroups' => false]));
+}
 
   private function saveSelectedProducts()
   {

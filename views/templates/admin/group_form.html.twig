@@ -9,25 +9,33 @@
 	{{ form_errors(form) }}
 
 	<div id="group-rows" data-prototype="
-			    <div class='group-entry mb-3'>
-			        <div class='row align-items-center'>
-			            <div class='col-md-3'>
-			                {{ form_widget(form.groups.vars.prototype['group_name'], {'attr': {'class': 'form-control'}})|e('html_attr') }}
-			            </div>
-			            <div class='col-md-4'>
-			                {{ form_widget(form.groups.vars.prototype['group_image'], {'attr': {'class': 'form-control-file'}})|e('html_attr') }}
-			            </div>
-			            <div class='col-md-3'>
-			                {{ form_widget(form.groups.vars.prototype['group_products'], {'attr': {'class': 'js-product-search form-control'}})|e('html_attr') }}
-			            </div>
-			        </div>
-			    </div>
-			">
+						    <div class='group-entry mb-3'>
+						        <div class='row align-items-center'>
+						            <div class='col-md-3'>
+						                {{ form_widget(form.groups.vars.prototype['group_name'], {'attr': {'class': 'form-control'}})|e('html_attr') }}
+						            </div>
+						            <div class='col-md-4'>
+						                {{ form_widget(form.groups.vars.prototype['group_image'], {'attr': {'class': 'form-control-file'}})|e('html_attr') }}
+						            </div>
+						            <div class='col-md-3'>
+						                {{ form_widget(form.groups.vars.prototype['group_products'], {'attr': {'class': 'js-product-search form-control'}})|e('html_attr') }}
+						            </div>
+						        </div>
+						    </div>
+						">
 
-		{% for group in form.groups %}
-			<div class="group-entry mb-3">
-				<div class="row align-items-center">
+		<div id="category-list">
+			{% for group in form.groups %}
+
+				<div class="row align-items-center group-entry mb-3 list-group-item" data-category-order="{{ group.vars['value']['group_order']  }}">
 					{{ form_widget(group.group_id) }}
+					{{ form_widget(group.group_order) }}
+					<div class="col-md-1">
+						<span class="sort-icon me-2" style="cursor: move;margin-right: 8px;">
+							<i class="fas fa-sort"></i>
+						</span>
+					</div>
+
 					<div class="col-md-3">
 						{{ form_widget(group.group_name) }}
 					</div>
@@ -44,7 +52,7 @@
 						{{ form_widget(group.group_image) }}
 					</div>
 
-					<div class="col-md-3">
+					<div class="col-md-2">
 						<button type="button" class="btn btn-secondary js-open-product-popup w-full" data-group-id="{{ group.group_id.vars.value }}" data-group-products="{{ group.group_products.vars.value|join(',') }}">
 							Produits :
 							<span class="product-count">{{ group.group_products.vars.value|length }}</span>
@@ -54,9 +62,8 @@
 					<div class="col-md-2">
 						<button type="button" class="btn btn-danger js-delete-group w-full" data-group-id="{{ group.group_id.vars.value }}">Supprimer</button>
 					</div>
-				</div>
 			</div>
-		{% endfor %}
+			{% endfor %}
 	</div>
 
 	<div class="row mt-4">
@@ -87,7 +94,7 @@
 			<div
 				class="action-buttons">
 				{# <button type="button" class="btn btn-secondary js-export-products">Exporter</button>
-								<button type="button" class="btn btn-secondary">Importer</button> #}
+					<button type="button" class="btn btn-secondary">Importer</button> #}
 				<button type="button" class="btn btn-danger js-delete-all-products">Supprimer tous les produits</button>
 			</div>
 		</div>

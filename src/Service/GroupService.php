@@ -31,6 +31,7 @@ class GroupService
             pg.id_group AS id_group,
             pg.name AS group_name,
             pg.image AS group_image,
+            pg.group_order AS group_order,
             p.id_product AS product_id,
             pl.name AS product_name,
             p.price AS product_price
@@ -66,9 +67,9 @@ class GroupService
             AND pl.id_lang = ' . (int) \Context::getContext()->language->getId() . '
             AND pl.id_shop = ' . (int) \Shop::getContextShopID()
         );
-        
+
 		$sql->orderBy('pgr.id_group ASC');
-        
+
         $result = \Db::getInstance()->executeS($sql);
 
         if (!$result) {
@@ -83,6 +84,7 @@ class GroupService
                     'id' => $row['id_group'],
                     'name' => $row['group_name'],
                     'image' => $row['group_image'],
+                    'group_order' => $row['group_order'],
                     'products' => [],
                 ];
             }
@@ -113,6 +115,7 @@ class GroupService
                 'group_name' => $group['name'],
                 'group_image' => $group['image'], // Use the image path or null
                 'group_products' => array_column($group['products'], 'id'), // Extract product IDs
+                'group_order' => $group['group_order'],
             ];
         }
 
