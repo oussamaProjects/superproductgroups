@@ -1,3 +1,11 @@
+<ul class="list-super-product-groups-images">
+  {foreach from=$groups item=group name=groupLoop}
+    <li data-id_group="{$group.id}" data-name_group="{$group.name}">
+      <img src="{$group.image}" alt="{$group.name|escape:'html'}" class="group-image" />
+    </li>
+  {/foreach}
+</ul>
+
 <div id="super-product-groups" class="super-product-groups isLogged_{$logged|intval}">
 
   <div id="list-super-product-groups">
@@ -41,9 +49,9 @@
       <div>Scroller ou Rechercher :</div>
 
       <div class="side-popup-search-controller">
-				<label>Numéro : </label>
-				<input type="text" id="group-product-search-num" class="group-product-search form-control" />
-			</div>
+        <label>Numéro : </label>
+        <input type="text" id="group-product-search-num" class="group-product-search form-control" />
+      </div>
 
       <div class="side-popup-search-controller">
         <label>Mot clé : </label>
@@ -75,10 +83,11 @@
       </div>
     </div> *}
     <div class="side-popup-after-body">
-    <div class="selected-groups-list-container">
+      <div class="selected-groups-list-container">
 
+      </div>
     </div>
-  </div>
+
     <div class="side-popup-footer">
       <button type="button" class="custom-button js-confirm-selection">Valider ma séléction</button>
     </div>
@@ -111,15 +120,15 @@
     <div class="side-popup-body">
       <div class="login-message">
         {if !$logged}
-        <div>
-          <span>{l s='Vous êtes professionnel ? ' d='Shop.Module.superproductgroups'}</span>
-          <a href="{$urls.pages.authentication}?back={$urls.current_url|urlencode}"
-            title="{l s='Log in to your customer account' d='Shop.Module.superproductgroups'}" rel="nofollow">
-            <span class="hidden-sm-down">{l s='Sign in' d='Shop.Module.superproductgroups'}</span>
-          </a>
-        </div>
-        <div>
-          {l s='pour accéder au cataloque prix dédié aux professionnels.' d='Shop.Module.superproductgroups'}
+          <div>
+            <span>{l s='Vous êtes professionnel ? ' d='Shop.Module.superproductgroups'}</span>
+            <a href="{$urls.pages.authentication}?back={$urls.current_url|urlencode}"
+              title="{l s='Log in to your customer account' d='Shop.Module.superproductgroups'}" rel="nofollow">
+              <span class="hidden-sm-down">{l s='Sign in' d='Shop.Module.superproductgroups'}</span>
+            </a>
+          </div>
+          <div>
+            {l s='pour accéder au cataloque prix dédié aux professionnels.' d='Shop.Module.superproductgroups'}
           </div>
         {/if}
       </div>
@@ -136,7 +145,8 @@
     </div>
 
     <div class="side-popup-footer">
-      <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Ajouter le panier</button>
+      <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Ajouter le
+        panier</button>
       <button type="button" class="custom-button order js-add-confirmed-selection-to-cart">Commander</button>
     </div>
 

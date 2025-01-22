@@ -17,7 +17,7 @@ $(document).ready(function () {
 
   const bodyClass = $("body").attr("class");
   const productIdMatch = bodyClass.match(/product-id-(\d+)/);
-  
+
   var productId = 0;
 
   if (productIdMatch && productIdMatch[1]) {
@@ -236,6 +236,10 @@ $(document).ready(function () {
     const name_group = $(this).data("name_group");
     // console.log("products", products);
     $(".selected-group-name").html(name_group);
+
+    // .list-super-product-groups-images li data id_group == $(this).data("id_group") add border css
+    $(".list-super-product-groups-images li").removeClass("active");
+    $(`.list-super-product-groups-images li[data-id_group="${id_group}"]`).addClass("active");
 
     // Populate the popup with products
     if (products && products.length > 0) {
@@ -682,4 +686,9 @@ $(document).ready(function () {
   $(".js-close-popup").on("click", function () {
     $groupPopup.removeClass("visible");
   });
+
+  // move .list-super-product-groups-images to the firs element in #product .page-content
+  var $list = $(".list-super-product-groups-images");
+  $("#product .page-content").prepend($list);
+
 });
