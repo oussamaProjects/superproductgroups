@@ -117,7 +117,7 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
 
       return $groupId;
     }
-   
+
 
     $db->insert('product_group', [
       'id_super_product' => (int)$superProductId,
@@ -325,14 +325,14 @@ class SuperProductGroupsController extends FrameworkBundleAdminController
     $sql = (new \DbQuery())
       ->select('pl.id_product, pl.name')
       ->from('product_lang', 'pl')
-      ->leftJoin('product_group', 'pg', 'pl.id_product = pg.id_super_product')
-      ->where('pg.id_super_product IS NULL') // Exclude products already in groups
-      ->leftJoin('product_group_relationship', 'pgr', 'pl.id_product = pgr.id_product')
-      ->where('pgr.id_product IS NULL') // Exclude products already in groups
+      // ->leftJoin('product_group', 'pg', 'pl.id_product = pg.id_super_product')
+      // ->where('pg.id_super_product IS NULL') // Exclude products already in groups
+      // ->leftJoin('product_group_relationship', 'pgr', 'pl.id_product = pgr.id_product')
+      // ->where('pgr.id_product IS NULL') // Exclude products already in groups
       ->where('pl.name LIKE "%' . pSQL($search) . '%"') // Match the search query
       ->where('pl.id_lang = ' . $languageId) // Filter by the current language
-      ->groupBy('pl.id_product') // Ensure no duplicate rows for the same product
-      ->orderBy('pgr.product_order ASC');
+      ->groupBy('pl.id_product');
+      // ->orderBy('pgr.product_order ASC');
 
     // Execute the query and fetch the results
     $products = \Db::getInstance()->executeS($sql);
