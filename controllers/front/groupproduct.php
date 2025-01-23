@@ -31,45 +31,77 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
   }
 
   public function checkProductHasGroups()
-{
+  {
     $productId = (int) Tools::getValue('id_product');
 
     if (!$productId) {
-        die(json_encode(['status' => 'error', 'message' => 'No product ID provided.']));
+      die(json_encode(['status' => 'error', 'message' => 'No product ID provided.']));
     }
     $groups = $this->module->getThisProductGroupsWithProducts($productId);
 
     if (!empty($groups)) {
-        die(json_encode(['status' => 'success', 'hasGroups' => true]));
+      die(json_encode(['status' => 'success', 'hasGroups' => true]));
     }
 
     die(json_encode(['status' => 'success', 'hasGroups' => false]));
-}
+  }
 
   private function saveSelectedProducts()
   {
-    $selectedProducts = Tools::getValue('selectedProducts');
+      $selectedProducts = Tools::getValue('selectedProducts');
+      $productId = (int) Tools::getValue('id_product');
 
-    // Validate input
-    if (!is_array($selectedProducts)) {
-      die(json_encode(['status' => 'error', 'message' => 'Invalid data format.']));
-    }
+      // Validate input
+      if (!is_array($selectedProducts) || !$productId) {
+          die(json_encode(['status' => 'error', 'message' => 'Invalid data format or missing product ID.']));
+      }
 
-    // Save to cookie
-    $this->context->cookie->__set('selected_products', json_encode($selectedProducts));
-    die(json_encode(['status' => 'success', 'message' => 'Products saved successfully.']));
+      // Retrieve existing data from cookie
+      $allProducts = json_decode($this->context->cookie->__get('selected_products'), true) ?? [];
+
+      // Update or set the selected products for the specific product ID
+      $allProducts[$productId] = $selectedProducts;
+
+      // Save updated data to the cookie
+      $this->context->cookie->__set('selected_products', json_encode($allProducts));
+
+      die(json_encode(['status' => 'success', 'message' => 'Products saved successfully.']));
   }
 
   private function getSelectedProducts()
   {
-    $selectedProducts = json_decode($this->context->cookie->__get('selected_products'), true) ?? [];
-    die(json_encode(['status' => 'success', 'selectedProducts' => $selectedProducts]));
+      $productId = (int) Tools::getValue('id_product');
+
+      if (!$productId) {
+          die(json_encode(['status' => 'error', 'message' => 'Missing product ID.']));
+      }
+
+      // Retrieve data from cookie
+      $allProducts = json_decode($this->context->cookie->__get('selected_products'), true) ?? [];
+
+      // Fetch selected products for the given product ID
+      $selectedProducts = $allProducts[$productId] ?? [];
+
+      die(json_encode(['status' => 'success', 'selectedProducts' => $selectedProducts]));
   }
 
   private function clearSelectedProducts()
   {
-      // Clear the selected products from the cookie
-      $this->context->cookie->__unset('selected_products');
+      $productId = (int) Tools::getValue('id_product');
+
+      if (!$productId) {
+          die(json_encode(['status' => 'error', 'message' => 'Missing product ID.']));
+      }
+
+      // Retrieve existing data from cookie
+      $allProducts = json_decode($this->context->cookie->__get('selected_products'), true) ?? [];
+
+      // Remove selected products for the given product ID
+      unset($allProducts[$productId]);
+
+      // Save updated data to the cookie
+      $this->context->cookie->__set('selected_products', json_encode($allProducts));
+
       die(json_encode(['status' => 'success', 'message' => 'Selected products cleared successfully.']));
   }
 }

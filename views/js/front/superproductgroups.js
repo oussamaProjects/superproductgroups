@@ -33,7 +33,6 @@ $(document).ready(function () {
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=CheckProductHasGroups";
-    // console.log("Checking products:", ajaxUrl);
 
     $.ajax({
       url: ajaxUrl,
@@ -41,7 +40,7 @@ $(document).ready(function () {
       data: { id_product: productId },
       success: function (response) {
         const res = JSON.parse(response);
-        // console.log("res", res);
+       console.log("checkProductGroups res", res);
 
         if (res.status === "success" && res.hasGroups) {
           $("body").addClass("has-product-groups");
@@ -100,7 +99,7 @@ $(document).ready(function () {
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
-          // console.log("Loaded selected products:", res.selectedProducts);
+         console.log("Loaded selected products:", res.selectedProducts);
           selectedProducts = res.selectedProducts;
 
           initProductActions();
