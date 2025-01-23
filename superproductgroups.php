@@ -222,7 +222,8 @@ class SuperProductGroups extends Module
           p.reference AS reference,
           ps.price AS product_price,
           pi.id_image AS product_image_id,
-          pl.link_rewrite AS link_rewrite
+          pl.link_rewrite AS link_rewrite,
+          stock.quantity AS stock_quantity
       ');
     $sql->from('product_group', 'pg');
 
@@ -261,6 +262,14 @@ class SuperProductGroups extends Module
       'image',
       'pi',
       'p.id_product = pi.id_product AND pi.cover = 1' // Ensure the cover image is fetched
+    );
+
+
+    // Join stock_available to fetch stock quantity
+    $sql->leftJoin(
+      'stock_available',
+      'stock',
+      'p.id_product = stock.id_product AND stock.id_shop = ' . (int)\Shop::getContextShopID()
     );
 
     $sql->where('pg.id_super_product = ' . (int)$productId);
@@ -311,6 +320,7 @@ class SuperProductGroups extends Module
           'group_image' => $row['group_image'],
           'name' => $row['product_name'],
           'price' => number_format((float)$row['product_price'], 2, '.', ''), // Format price to 2 decimals
+          'stock_quantity' => (int)$row['stock_quantity'], // Stock quantity
           'image' => $imageUrl,
         ];
       }

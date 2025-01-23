@@ -311,7 +311,7 @@ $(document).ready(function () {
                 <div class="product-price">
                   ${parseFloat(product.price).toFixed(
                     2
-                  )} €<span class="public-price">PRIX PUBLIC</span>
+                  )} €<span class="public-price">PRIX PUBLIC</span> <span class="stock">Stock: ${product.stock_quantity}</span>
                 </div>
 
               </div>
