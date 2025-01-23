@@ -145,6 +145,7 @@ $(document).ready(function () {
       groupedProducts = selectedProducts.reduce((acc, product) => {
         if (!acc[product.id_group]) {
           acc[product.id_group] = {
+            id_group: product.id_group,
             group_name: product.group_name,
             total_price: 0,
             products: [],
@@ -177,15 +178,24 @@ $(document).ready(function () {
       );
 
       // Create HTML for each group
-      const groupedHtml = Object.values(groupedProducts)
-        .map(
-          (group) =>
-            `<div class="group">
+      updateGroupListHtml();
+    } else {
+      $selectedGroupsList.html("<p>Aucun produit sélectionné.</p>");
+    }
+  }
+
+  // update group list html
+  function updateGroupListHtml() {
+    // Create HTML for each group
+    const groupedHtml = Object.values(groupedProducts)
+      .map(
+        (group) =>
+          `<div class="group" data-group="${group.id_group}">
                   <div class="group-name">${group.group_name}</div>
                   <div class="group-total-price">${group.total_price.toFixed(
                     2
                   )} €</div>
-                   <span class="js-view-selected-products">Voir Produits Sélectionnés</span>
+                   <span class="js-view-selected-products">Voir sélection</span>
                 <div class="hidden group-products">
                   ${group.products
                     .map(
@@ -207,25 +217,22 @@ $(document).ready(function () {
                 </div>
             </div>
             `
-        )
-        .join("");
+      )
+      .join("");
 
-      $selectedGroupsList.html(
-        `
+    $selectedGroupsList.html(
+      `
           ${groupedHtml}
           <div class="row">
             <div class="col-md-6">
-              <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Ajouter le panier</button>
+              <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Ajouter au panier</button>
             </div>
             <div class="col-md-6">
               <button type="button" class="custom-button order js-add-confirmed-selection-to-cart">Commander</button>
             </div>
           </div>
       `
-      );
-    } else {
-      $selectedGroupsList.html("<p>Aucun produit sélectionné.</p>");
-    }
+    );
   }
 
   // Open side popup and populate products
@@ -239,7 +246,16 @@ $(document).ready(function () {
 
     // .list-super-product-groups-images li data id_group == $(this).data("id_group") add border css
     $(".list-super-product-groups-images li").removeClass("active");
-    $(`.list-super-product-groups-images li[data-id_group="${id_group}"]`).addClass("active");
+    $(
+      `.list-super-product-groups-images li[data-id_group="${id_group}"]`
+    ).addClass("active");
+
+    // add the image in the div class .images-container
+    const groupImage =
+      $(
+        `.list-super-product-groups-images li[data-id_group="${id_group}"] img`
+      ).attr("src") || DEFAULT_IMAGE;
+    $(".images-container").html(`<img src="${groupImage}" alt="Group Image">`);
 
     // Populate the popup with products
     if (products && products.length > 0) {
@@ -447,7 +463,7 @@ $(document).ready(function () {
       const selectedHtml = Object.values(groupedProducts)
         .map(
           (group) =>
-            `<div class="group">
+            `<div class="group" data-group="${group.id_group}">
                 <!-- Group Name -->
                 <div class="group-name">${group.group_name}</div>
                 <div class="group-products">
@@ -553,6 +569,7 @@ $(document).ready(function () {
 
     selectedProduct.attr("data-product", JSON.stringify(productData));
 
+
     $(".total").text(
       `${selectedProducts
         .reduce(
@@ -562,6 +579,8 @@ $(document).ready(function () {
         .toFixed(2)} €`
     );
     saveSelectedProducts(productId, selectedProducts);
+    initProductActions();
+
     // console.log("Updated selectedProducts:", selectedProducts); // Debugging output
   });
 
@@ -584,6 +603,8 @@ $(document).ready(function () {
         .toFixed(2)} €`
     );
     saveSelectedProducts(productId, selectedProducts);
+    initProductActions();
+
   });
 
   // Handle confirmation of selected products
@@ -690,5 +711,4 @@ $(document).ready(function () {
   // move .list-super-product-groups-images to the firs element in #product .page-content
   var $list = $(".list-super-product-groups-images");
   $("#product .page-content").prepend($list);
-
 });

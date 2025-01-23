@@ -1,8 +1,10 @@
 <ul class="list-super-product-groups-images">
   {foreach from=$groups item=group name=groupLoop}
-    <li data-id_group="{$group.id}" data-name_group="{$group.name}">
-      <img src="{$group.image}" alt="{$group.name|escape:'html'}" class="group-image" />
-    </li>
+    {if $group.image != ''}
+      <li data-id_group="{$group.id}" data-name_group="{$group.name}">
+        <img src="{$group.image}" alt="{$group.name|escape:'html'}" class="group-image" />
+      </li>
+    {/if}
   {/foreach}
 </ul>
 
@@ -145,8 +147,7 @@
     </div>
 
     <div class="side-popup-footer">
-      <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Ajouter le
-        panier</button>
+      <button type="button" class="custom-button add-to-cart js-add-confirmed-selection-to-cart">Ajouter au panier</button>
       <button type="button" class="custom-button order js-add-confirmed-selection-to-cart">Commander</button>
     </div>
 
