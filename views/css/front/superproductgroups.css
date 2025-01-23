@@ -342,7 +342,8 @@
   background-color: #1d1060;
 }
 
-.product-label {
+.product-label,
+.product-label a {
   flex: 1;
   color: #1d1060;
   font-family: Poppins, sans-serif;
@@ -561,8 +562,8 @@
   justify-content: flex-end;
   align-items: center;
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 2px;
+  top: 2px;
 }
 
 /* Quantity buttons styling */

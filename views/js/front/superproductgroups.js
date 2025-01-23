@@ -40,7 +40,7 @@ $(document).ready(function () {
       data: { id_product: productId },
       success: function (response) {
         const res = JSON.parse(response);
-       console.log("checkProductGroups res", res);
+        console.log("checkProductGroups res", res);
 
         if (res.status === "success" && res.hasGroups) {
           $("body").addClass("has-product-groups");
@@ -99,7 +99,7 @@ $(document).ready(function () {
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
-         console.log("Loaded selected products:", res.selectedProducts);
+          console.log("Loaded selected products:", res.selectedProducts);
           selectedProducts = res.selectedProducts;
 
           initProductActions();
@@ -260,12 +260,14 @@ $(document).ready(function () {
     if (products && products.length > 0) {
       const productsHtml = products
         .map((product, index) => {
-          const productImage = product.image
-            ? product.image
-            : "/img/p/fr-default-home_default.jpg";
+          const productImage = product.image ? product.image : "/img/p/fr-default-home_default.jpg";
+          const productUrl = prestashop.urls.base_url + `index.php?id_product=${product.id}&controller=product`;
+
           return `<div class="custom-product">
               <div class="product-image">
-                <img src="${productImage}" alt="${product.name}">
+                <a href="${productUrl}" target="_blank">
+                  <img src="${productImage}" alt="${product.name}">
+                </a>
               </div>
               <div class="product-infos" for="product-${product.id}">
 
@@ -298,7 +300,10 @@ $(document).ready(function () {
 
                 <div class="product-count">${index + 1}</div>
                 <div class="product-label">
-                ${product.name} (Code: ${product.reference || "N/A"})
+                  <a href="${productUrl}" target="_blank">
+                    ${product.name}
+                  </a>
+                  (Code: ${product.reference || "N/A"})
                 </div>
                 <div class="product-code" style="display: none;">
                   ${product.reference}
@@ -568,7 +573,6 @@ $(document).ready(function () {
 
     selectedProduct.attr("data-product", JSON.stringify(productData));
 
-
     $(".total").text(
       `${selectedProducts
         .reduce(
@@ -603,7 +607,6 @@ $(document).ready(function () {
     );
     saveSelectedProducts(productId, selectedProducts);
     initProductActions();
-
   });
 
   // Handle confirmation of selected products
