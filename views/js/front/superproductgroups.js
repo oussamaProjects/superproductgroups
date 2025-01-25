@@ -85,6 +85,42 @@ $(document).ready(function () {
     });
   }
 
+  /**
+   * Save selected products via AJAX
+   *
+   * @param {number} productId - The ID of the super product
+   * @param {Array} products - The array of selected products
+   */
+  function addSelectedProductsToCart(productId, products) {
+    const ajaxUrl =
+      prestashop.urls.base_url +
+      "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=AddSelectedProductsToCart";
+
+    $.ajax({
+      url: ajaxUrl,
+      type: "POST",
+      data: {
+        selectedProducts: products,
+        id_product: productId,
+      },
+      success: function (response) {
+        try {
+          const res = JSON.parse(response);
+          if (res.status === "success") {
+            console.log("Products saved successfully:", res.message);
+          } else {
+            console.error("Error saving products:", res.message);
+          }
+        } catch (e) {
+          console.error("Error parsing response:", e, response);
+        }
+      },
+      error: function (xhr) {
+        console.error("AJAX Error:", xhr.responseText);
+      },
+    });
+  }
+
   function getSelectedProducts(productId) {
     const ajaxUrl =
       prestashop.urls.base_url +
@@ -253,15 +289,19 @@ $(document).ready(function () {
     const groupImage =
       $(
         `.list-super-product-groups-images li[data-id_group="${id_group}"] img`
-      ).attr("src") || DEFAULT_IMAGE;
+      ).attr("src") || "DEFAULT_IMAGE";
     $(".images-container").html(`<img src="${groupImage}" alt="Group Image">`);
 
     // Populate the popup with products
     if (products && products.length > 0) {
       const productsHtml = products
         .map((product, index) => {
-          const productImage = product.image ? product.image : "/img/p/fr-default-home_default.jpg";
-          const productUrl = prestashop.urls.base_url + `index.php?id_product=${product.id}&controller=product`;
+          const productImage = product.image
+            ? product.image
+            : "/img/p/fr-default-home_default.jpg";
+          const productUrl =
+            prestashop.urls.base_url +
+            `index.php?id_product=${product.id}&controller=product`;
 
           return `<div class="custom-product">
               <div class="product-image">
@@ -311,7 +351,9 @@ $(document).ready(function () {
                 <div class="product-price">
                   ${parseFloat(product.price).toFixed(
                     2
-                  )} €<span class="public-price">PRIX PUBLIC</span> <span class="stock">Stock: ${product.stock_quantity}</span>
+                  )} €<span class="public-price">PRIX PUBLIC</span> <span class="stock">Stock: ${
+            product.stock_quantity
+          }</span>
                 </div>
 
               </div>
@@ -629,7 +671,15 @@ $(document).ready(function () {
     const totalProducts = selectedProducts.length;
     let addedProducts = 0;
 
+    const mainProductId = productId; // The ID of the main (super) pro
+
     const addToCart = (product) => {
+      // Prepare custom data to associate the product with the main product
+      const customFields = {
+        main_product_id: mainProductId, // Main product ID for association
+        is_associated: true, // Mark as associated with a main product
+      };
+
       $.ajax({
         url: prestashop.urls.pages.cart, // Use PrestaShop's built-in cart URL
         type: "POST",
@@ -641,6 +691,7 @@ $(document).ready(function () {
           id_customization: 0, // If customization is not required
           id_product_attribute: 0, // If no specific attribute is selected
           qty: product.quantity, // Adjust quantity as needed
+          custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
         },
         success: function () {
           console.log(`Product ${product.name} added to cart successfully.`);

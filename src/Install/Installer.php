@@ -74,6 +74,10 @@ class Installer
       'displayAdminProductsExtra',
       'actionFrontControllerSetMedia',
       'displayProductAdditionalInfo',
+      'actionCartSave',
+      'displayShoppingCart',
+      'actionValidateOrder',
+      'displayAdminOrderMain',
 
     ];
     return (bool) $module->registerHook($hooks);

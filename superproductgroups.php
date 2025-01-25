@@ -14,9 +14,9 @@
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @author PrestaShop SA and Contributors <contact@prestashop.com>
  * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @license https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
 declare(strict_types=1);
@@ -96,7 +96,7 @@ class SuperProductGroups extends Module
     $super_product = new Product($productId);
 
     // Retrieve groups for this product
-    $formData = $this->getFormData($productId );
+    $formData = $this->getFormData($productId);
 
     // Create the form
     $formFactory = $this->get('form.factory');
@@ -112,10 +112,10 @@ class SuperProductGroups extends Module
   }
 
 
-  public function getFormData($productId ): array
+  public function getFormData($productId): array
   {
     // Get groups with products from the existing method
-    $groupsWithProducts = $this->getThisProductGroupsWithProducts($productId );
+    $groupsWithProducts = $this->getThisProductGroupsWithProducts($productId);
 
     // Initialize the $formData array
     $formData = ['groups' => []];
@@ -305,7 +305,7 @@ class SuperProductGroups extends Module
 
         // Generate the full product image URL
         if (!empty($row['product_image_id'])) {
-          $imageUrl =  "http://" .  $link->getImageLink(
+          $imageUrl = "http://" . $link->getImageLink(
             $row['link_rewrite'], // SEO-friendly URL
             $row['product_id'] . '-' . $row['product_image_id'],
             'small_default'
@@ -359,5 +359,119 @@ class SuperProductGroups extends Module
     ]);
 
     return $this->display(__FILE__, 'views/templates/front/group_list.tpl');
+  }
+
+
+  public function hookActionCartSave($params)
+  {
+    // Get the cart object from the hook parameters
+    $cart = $params['cart'];
+
+    // Retrieve the custom fields from the request
+    $customFields = Tools::getValue('custom_fields');
+
+    if ($customFields) {
+      $customFields = json_decode($customFields, true);
+
+      // Check if the custom fields contain the main product ID
+      if (!empty($customFields['main_product_id'])) {
+        // Loop through the products in the cart to find the relevant product
+        foreach ($cart->getProducts() as $product) {
+          // Save the custom fields for this product
+          $this->saveCustomFieldsToCart($cart->id, $product['id_product'], $customFields);
+        }
+      }
+    }
+  }
+
+  public function hookDisplayShoppingCart($params)
+  {
+    $cartId = $this->context->cart->id;
+    $languageId = (int)$this->context->language->id;
+
+    // Fetch custom fields, super product names, and product names for the cart
+    $customFields = Db::getInstance()->executeS(
+      '
+      SELECT
+          ccf.id_product,
+          pl.name AS product_name,
+          pl_super.name AS super_product_name,
+          JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) AS main_product_id
+      FROM ' . _DB_PREFIX_ . 'cart_custom_fields ccf
+      INNER JOIN ' . _DB_PREFIX_ . 'product_lang pl
+          ON ccf.id_product = pl.id_product
+      LEFT JOIN ' . _DB_PREFIX_ . 'product_lang pl_super
+          ON JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) = pl_super.id_product
+      INNER JOIN ' . _DB_PREFIX_ . 'cart_product cp
+          ON ccf.id_product = cp.id_product AND cp.id_cart = ccf.id_cart
+      WHERE ccf.id_cart = ' . (int)$cartId . '
+        AND pl.id_lang = ' . (int)$languageId . '
+        AND pl_super.id_lang = ' . (int)$languageId . '
+      GROUP BY ccf.id_product, main_product_id
+      '
+    );
+
+    // Format data for easy access in the template
+    $customFieldsByProduct = [];
+    foreach ($customFields as $field) {
+      $customFieldsByProduct[] = [
+        'product_name' => $field['product_name'], // Super product name
+        'super_product_name' => $field['super_product_name'], // Super product name
+      ];
+    }
+
+    // Assign data to Smarty
+    $this->context->smarty->assign([
+      'customFieldsByProduct' => $customFieldsByProduct,
+    ]);
+
+    return $this->display(__FILE__, 'views/templates/front/cart_super_products.tpl');
+  }
+
+  /**
+   * Save custom fields to the database
+   */
+  private function saveCustomFieldsToCart($cartId, $productId, $customFields)
+  {
+    Db::getInstance()->insert('cart_custom_fields', [
+      'id_cart' => (int) $cartId,
+      'id_product' => (int) $productId,
+      'custom_fields' => pSQL(json_encode($customFields)),
+      'date_add' => date('Y-m-d H:i:s'),
+      'date_upd' => date('Y-m-d H:i:s'),
+    ]);
+  }
+
+  public function hookActionValidateOrder($params)
+  {
+    $order = $params['order'];
+    $cartId = $order->id_cart;
+
+    // Update cart records to use the final order ID
+    Db::getInstance()->update(
+      'superproduct_order',
+      ['id_order' => (int) $order->id],
+      'id_order = ' . (int) $cartId
+    );
+  }
+
+  public function hookDisplayAdminOrderMain($params)
+  {
+    $orderId = (int) $params['id_order'];
+
+    // Fetch super products for this order
+    $sql = (new DbQuery())
+      ->select('id_super_product, associated_products')
+      ->from('superproduct_order')
+      ->where('id_order = ' . (int) $orderId);
+
+    $superProducts = Db::getInstance()->executeS($sql);
+
+    // Assign data to Smarty
+    $this->context->smarty->assign([
+      'superProducts' => $superProducts,
+    ]);
+
+    return $this->display(__FILE__, 'views/templates/admin/order_super_products.tpl');
   }
 }
