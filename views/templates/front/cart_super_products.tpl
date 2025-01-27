@@ -1,4 +1,4 @@
-<table class="table">
+{* <table class="table">
   <thead>
     <tr>
       <th>Super Product</th>
@@ -25,4 +25,4 @@
       </tr>
     {/foreach}
   </tbody>
-</table>
+</table> *}
