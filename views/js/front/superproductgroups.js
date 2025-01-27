@@ -11,6 +11,9 @@ $(document).ready(function () {
   const $product_actions = $(".js-product-actions");
   const $add_to_cart = $(".js-product-actions js-product-add-to-cart");
 
+  let selectedProducts = [];
+  let groupedProducts = [];
+
   // $product_prices.hide();
   // $product_actions.hide();
   // $add_to_cart.hide();
@@ -53,9 +56,6 @@ $(document).ready(function () {
       },
     });
   }
-
-  let selectedProducts = [];
-  let groupedProducts = [];
 
   function saveSelectedProducts(productId, products) {
     const ajaxUrl =
@@ -478,10 +478,13 @@ $(document).ready(function () {
     //     selectedProducts.push(product);
     //   }
     // });
+    // console.log("newlySelectedProducts", newlySelectedProducts);
 
     // Updateproducts without replacing existing ones
     newlySelectedProducts.forEach((product) => {
-      const existingProduct = selectedProducts.find((p) => p.id == product.id);
+      const existingProduct = selectedProducts.find(
+        (p) => p.id == product.id && p.id_group == product.id_group
+      );
       if (existingProduct) {
         existingProduct.quantity =
           parseFloat(existingProduct.quantity) + parseFloat(product.quantity);

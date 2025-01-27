@@ -76,7 +76,6 @@ class Installer
       'displayProductAdditionalInfo',
       'actionCartSave',
       'displayShoppingCart',
-      'actionValidateOrder',
       'displayAdminOrderMain',
 
     ];
