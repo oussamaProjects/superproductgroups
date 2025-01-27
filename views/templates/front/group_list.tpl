@@ -2,7 +2,8 @@
   <ul class="list-super-product-groups-images">
     {foreach from=$groups item=group name=groupLoop}
       {if $group.image != ''}
-        <li data-id_group="{$group.id}" data-name_group="{$group.name}">
+        <li class="js-open-group-popup" data-id_group="{$group.id}" data-name_group="{$group.name}"
+        data-products="{$group.products|json_encode|escape:'html'}">
           <img src="{$group.image}" alt="{$group.name|escape:'html'}" class="group-image" />
         </li>
       {/if}
@@ -92,7 +93,7 @@
       </div>
 
       <div class="side-popup-footer">
-        <button type="button" class="custom-button js-confirm-selection">Valider ma séléction</button>
+        <button type="button" class="custom-button js-confirm-selection">Ajouter à ma sélection</button>
       </div>
 
       <div class="side-popup-after-body">
@@ -111,7 +112,7 @@
 
         {* <div class="notice">Décocher produit : suppression du panier et la ligne s'enlève</div> *}
         <div class="title">
-          Valider ma sélection
+          Valider ma séléction
           <div class="blue"><strong>{$product.name}</strong></div>
         </div>
 

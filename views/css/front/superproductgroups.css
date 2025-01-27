@@ -287,6 +287,14 @@
   text-underline-position: from-font;
 }
 
+.side-popup-body #group-products {
+  overflow-y: auto;
+  scrollbar-color: #1d1060 #f0f0f0;
+  z-index: 0;
+  position: relative;
+  height: calc(100vh - 330px);
+}
+
 .custom-product {
   display: flex;
   align-items: center;
@@ -381,9 +389,22 @@
 .product-input:checked {
   border: 1px solid #1d1060;
   background-color: #56c072;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: url(/img/cms/icones/validation.png) no-repeat 0 0 #56C074;
+  background-size: 19px;
 }
 
 .side-popup-after-body {
+  position: fixed;
+  bottom: 0;
+  z-index: 1;
+  background: #f8f8f8 !important;
+  padding: 5px 14px;
+  border-radius: 5px;
+  height: 148px;
+  overflow: auto;
 }
 
 .side-popup-after-body .selected-groups-list .group {
@@ -607,6 +628,15 @@
 
 .has-product-groups .images-container {
   padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #cfcfcf;
+}
+
+.has-product-groups .images-container img {
+  max-width: 100%;
 }
 
 .has-product-groups .images-container .product-thumbs-outer {
@@ -631,6 +661,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+}
+
+.has-product-groups .page-content .list-super-product-groups-images li img {
+  max-width: 100%;
 }
 
 .has-product-groups .page-content .list-super-product-groups-images li.active {
@@ -646,8 +681,14 @@
 .has-product-groups .product-information .js-product-images-modal,
 .has-product-groups .product-information .js-product-prices,
 .has-product-groups .product-information .js-product-add-to-cart,
-.has-product-groups .product-information .js-product-additional-info .tdstockinfo,
-.has-product-groups .product-information .js-product-additional-info .social-sharing,
+.has-product-groups
+  .product-information
+  .js-product-additional-info
+  .tdstockinfo,
+.has-product-groups
+  .product-information
+  .js-product-additional-info
+  .social-sharing,
 .has-product-groups .product-information .product-payment-logo,
 .has-product-groups .product-information .js-product-meta,
 .has-product-groups .product-information .blockreassurance_product {

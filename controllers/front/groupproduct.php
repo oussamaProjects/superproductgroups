@@ -25,10 +25,6 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
         $this->clearSelectedProducts();
         break;
 
-      case 'AddSelectedProductsToCart':
-        $this->addSelectedProductsToCart();
-        break;
-
       default:
         die(json_encode(['status' => 'error', 'message' => 'Invalid action.']));
     }
@@ -49,7 +45,6 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
 
     die(json_encode(['status' => 'success', 'hasGroups' => false]));
   }
-
   private function saveSelectedProducts()
   {
     $selectedProducts = Tools::getValue('selectedProducts');
@@ -60,52 +55,20 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
       die(json_encode(['status' => 'error', 'message' => 'Invalid data format or missing product ID.']));
     }
 
-    // Retrieve existing data from cookie
-    $allProducts = json_decode($this->context->cookie->__get('selected_products'), true) ?? [];
+    // Start or resume the session
+    if (session_status() == PHP_SESSION_NONE) {
+      session_start();
+    }
+
+    // Initialize session data if it doesn't exist
+    if (!isset($_SESSION['selected_products'])) {
+      $_SESSION['selected_products'] = [];
+    }
 
     // Update or set the selected products for the specific product ID
-    $allProducts[$productId] = $selectedProducts;
-
-    // Save updated data to the cookie
-    $this->context->cookie->__set('selected_products', json_encode($allProducts));
+    $_SESSION['selected_products'][$productId] = $selectedProducts;
 
     die(json_encode(['status' => 'success', 'message' => 'Products saved successfully.']));
-  }
-
-  private function addSelectedProductsToCart()
-  {
-    $selectedProducts = Tools::getValue('selectedProducts');
-    $productId = (int) Tools::getValue('id_product');
-
-    // Validate input
-    if (!is_array($selectedProducts)) {
-      die(json_encode(['status' => 'error', 'message' => 'Invalid data format or missing product ID.']));
-    }
-
-    // Retrieve existing data from cookie
-    $allProducts = json_decode($this->context->cookie->__get('selected_products'), true) ?? [];
-
-    // Update or set the selected products for the specific product ID
-    $allProducts[$productId] = $selectedProducts;
-
-    // Save data to the database instead of a cookie
-    $cartId = $this->context->cart->id;
-    echo  'cartId' ;
-    echo  $cartId ;
-
-    if (!$cartId) {
-      die(json_encode(['status' => 'error', 'message' => 'No active cart.']));
-    }
-
-    foreach ($selectedProducts as $product) {
-      Db::getInstance()->insert('superproduct_order', [
-        'id_order' => $cartId, // Use cart ID for now, replace with order ID after order placement
-        'id_super_product' => $productId,
-        'associated_products' => json_encode($selectedProducts),
-      ]);
-    }
-
-    die(json_encode(['status' => 'success', 'message' => 'Products saved in cart.']));
   }
 
   private function getSelectedProducts()
@@ -116,8 +79,13 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
       die(json_encode(['status' => 'error', 'message' => 'Missing product ID.']));
     }
 
-    // Retrieve data from cookie
-    $allProducts = json_decode($this->context->cookie->__get('selected_products'), true) ?? [];
+    // Start or resume the session
+    if (session_status() == PHP_SESSION_NONE) {
+      session_start();
+    }
+
+    // Retrieve data from session
+    $allProducts = $_SESSION['selected_products'] ?? [];
 
     // Fetch selected products for the given product ID
     $selectedProducts = $allProducts[$productId] ?? [];
@@ -133,14 +101,15 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
       die(json_encode(['status' => 'error', 'message' => 'Missing product ID.']));
     }
 
-    // Retrieve existing data from cookie
-    $allProducts = json_decode($this->context->cookie->__get('selected_products'), true) ?? [];
+    // Start or resume the session
+    if (session_status() == PHP_SESSION_NONE) {
+      session_start();
+    }
 
     // Remove selected products for the given product ID
-    unset($allProducts[$productId]);
-
-    // Save updated data to the cookie
-    $this->context->cookie->__set('selected_products', json_encode($allProducts));
+    if (isset($_SESSION['selected_products'][$productId])) {
+      unset($_SESSION['selected_products'][$productId]);
+    }
 
     die(json_encode(['status' => 'success', 'message' => 'Selected products cleared successfully.']));
   }

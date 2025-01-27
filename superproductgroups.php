@@ -361,31 +361,91 @@ class SuperProductGroups extends Module
     return $this->display(__FILE__, 'views/templates/front/group_list.tpl');
   }
 
-
   public function hookActionCartSave($params)
   {
-    // Get the cart object from the hook parameters
-    $cart = $params['cart'];
+    if (!isset($this->context->cart) || !$this->context->cart->id) {
+      return;
+    }
 
-    // Retrieve the custom fields from the request
-    $customFields = Tools::getValue('custom_fields');
+    $cart = $this->context->cart;
+    $rawCustomFields = Tools::getValue('custom_fields');
 
-    if ($customFields) {
-      $customFields = json_decode($customFields, true);
+    // Decode the custom fields
+    $customFields = $rawCustomFields ? json_decode($rawCustomFields, true) : null;
+    // Get the current product ID
+    $currentProductId = Tools::getValue('id_product');
 
-      // Check if the custom fields contain the main product ID
-      if (!empty($customFields['main_product_id'])) {
-        // Loop through the products in the cart to find the relevant product
-        foreach ($cart->getProducts() as $product) {
-          // Save the custom fields for this product
-          $this->saveCustomFieldsToCart($cart->id, $product['id_product'], $customFields);
+    // Fetch the quantity of the current product from the cart
+    $productQuantity = 1; // Default to 1
+    if ($currentProductId) {
+      $productsInCart = $cart->getProducts();
+      foreach ($productsInCart as $product) {
+        if ((int)$product['id_product'] === (int)$currentProductId) {
+          $productQuantity = (int)$product['cart_quantity'];
+          break;
         }
       }
     }
+
+    // Initialize customFields if empty or missing main_product_id
+    if (empty($customFields) || empty($customFields['main_product_id'])) {
+
+      $customFields = [
+        'main_product_id' => 0, // Default value for main_product_id
+        // 'quantity' => $productQuantity,
+        'quantity' => 1,
+        'is_associated' => false, // Default value indicating no association
+      ];
+
+      error_log('Custom Fields initialized with default data: ' . print_r($customFields, true));
+    }
+    // else{
+    //   $customFields['quantity'] = $productQuantity;
+    // }
+
+    // If a product ID is provided, remove duplicates for the same main_product_id
+    if ($currentProductId) {
+      // $this->removeProductsFromCartByProductAndMainProduct($cart->id, $currentProductId, $customFields['main_product_id']);
+      // $this->deleteCustomFieldsByProductAndMainProduct($cart->id, $currentProductId, $customFields['main_product_id']);
+    }
+
+    // Save the custom fields for the current product
+    $currentProductId = Tools::getValue('id_product');
+    if ($currentProductId) {
+      $this->saveCustomFieldsToCart($cart->id, $currentProductId, $customFields);
+    }
+  }
+
+  private function removeProductsFromCartByProductAndMainProduct($cartId, $productId, $mainProductId)
+  {
+    // Delete the specific product with the given main_product_id
+    Db::getInstance()->delete(
+      'cart_product',
+      'id_cart = ' . (int)$cartId . '
+         AND id_product = ' . (int)$productId . '
+         AND id_product IN (
+            SELECT id_product
+            FROM ' . _DB_PREFIX_ . 'cart_custom_fields
+            WHERE id_cart = ' . (int)$cartId . '
+              AND JSON_UNQUOTE(JSON_EXTRACT(custom_fields, "$.main_product_id")) = ' . (int)$mainProductId . '
+         )'
+    );
+  }
+
+  private function deleteCustomFieldsByProductAndMainProduct($cartId, $productId, $mainProductId)
+  {
+    // Delete the custom fields for the specific product with the given main_product_id
+    Db::getInstance()->delete(
+      'cart_custom_fields',
+      'id_cart = ' . (int)$cartId . '
+         AND id_product = ' . (int)$productId . '
+         AND JSON_UNQUOTE(JSON_EXTRACT(custom_fields, "$.main_product_id")) = ' . (int)$mainProductId
+    );
   }
 
   private function saveCustomFieldsToCart($cartId, $productId, $customFields)
   {
+    // Insert or update custom fields for the specific product
     Db::getInstance()->insert('cart_custom_fields', [
       'id_cart' => (int) $cartId,
       'id_product' => (int) $productId,
@@ -424,6 +484,8 @@ class SuperProductGroups extends Module
 
     // Format data for easy access in the template
     $customFieldsByProduct = [];
+    print_r($customFields);
+    die;
     foreach ($customFields as $field) {
       $customFieldsByProduct[] = [
         'product_name' => $field['product_name'], // Super product name
@@ -454,24 +516,24 @@ class SuperProductGroups extends Module
 
   public function hookDisplayAdminOrderMain($params)
   {
-      $orderId = (int) $params['id_order'];
-      $languageId = (int)$this->context->language->id;
-  
-      // Fetch the cartId associated with the order
-      $cartId = Db::getInstance()->getValue(
-          'SELECT id_cart
+    $orderId = (int) $params['id_order'];
+    $languageId = (int)$this->context->language->id;
+
+    // Fetch the cartId associated with the order
+    $cartId = Db::getInstance()->getValue(
+      'SELECT id_cart
            FROM ' . _DB_PREFIX_ . 'orders
            WHERE id_order = ' . $orderId
-      );
-  
-      if (!$cartId) {
-          // If no cart ID is found, stop execution
-          return '<p>No cart associated with this order.</p>';
-      }
-  
-      // Fetch custom fields, super product names, and product names for the cart
-      $customFields = Db::getInstance()->executeS(
-          '
+    );
+
+    if (!$cartId) {
+      // If no cart ID is found, stop execution
+      return '<p>No cart associated with this order.</p>';
+    }
+
+    // Fetch custom fields, super product names, and product names for the cart
+    $customFields = Db::getInstance()->executeS(
+      '
           SELECT
               ccf.id_product,
               pl.name AS product_name,
@@ -489,23 +551,23 @@ class SuperProductGroups extends Module
             AND pl_super.id_lang = ' . (int)$languageId . '
           GROUP BY ccf.id_product, main_product_id
           '
-      );
-  
-      // Format data for easy access in the template
-      $products = [];
-      foreach ($customFields as $field) {
-          $products[] = [
-              'product_name' => $field['product_name'], // Product name
-              'super_product_name' => $field['super_product_name'], // Super product name
-          ];
-      }
-  
-      // Assign data to Smarty
-      $this->context->smarty->assign([
-          'orderProducts' => $products,
-      ]);
-  
-      // Display the custom template
-      return $this->display(__FILE__, 'views/templates/admin/order_products_groups.tpl');
+    );
+
+    // Format data for easy access in the template
+    $products = [];
+    foreach ($customFields as $field) {
+      $products[] = [
+        'product_name' => $field['product_name'], // Product name
+        'super_product_name' => $field['super_product_name'], // Super product name
+      ];
+    }
+
+    // Assign data to Smarty
+    $this->context->smarty->assign([
+      'orderProducts' => $products,
+    ]);
+
+    // Display the custom template
+    return $this->display(__FILE__, 'views/templates/admin/order_products_groups.tpl');
   }
 }

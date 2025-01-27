@@ -28,6 +28,7 @@ $(document).ready(function () {
     console.log("Extracted Product ID:", productId);
     // Proceed with your logic using productId
     checkProductGroups(productId);
+    getSelectedProducts(productId);
   } else {
     console.warn("No product ID found in body class.");
   }
@@ -77,42 +78,6 @@ $(document).ready(function () {
           // console.log("Products saved successfully:", res.message);
         } else {
           console.error("Error saving products:", res.message);
-        }
-      },
-      error: function (xhr) {
-        console.error("AJAX Error:", xhr.responseText);
-      },
-    });
-  }
-
-  /**
-   * Save selected products via AJAX
-   *
-   * @param {number} productId - The ID of the super product
-   * @param {Array} products - The array of selected products
-   */
-  function addSelectedProductsToCart(productId, products) {
-    const ajaxUrl =
-      prestashop.urls.base_url +
-      "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=AddSelectedProductsToCart";
-
-    $.ajax({
-      url: ajaxUrl,
-      type: "POST",
-      data: {
-        selectedProducts: products,
-        id_product: productId,
-      },
-      success: function (response) {
-        try {
-          const res = JSON.parse(response);
-          if (res.status === "success") {
-            console.log("Products saved successfully:", res.message);
-          } else {
-            console.error("Error saving products:", res.message);
-          }
-        } catch (e) {
-          console.error("Error parsing response:", e, response);
         }
       },
       error: function (xhr) {
@@ -171,8 +136,6 @@ $(document).ready(function () {
       },
     });
   }
-
-  getSelectedProducts(productId);
 
   function initProductActions() {
     if (selectedProducts.length > 0) {
@@ -543,7 +506,7 @@ $(document).ready(function () {
                             <button class="btn-delete" data-product-id="${
                               product.id
                             }">
-                              <i class-"fa fa-delete"></i>X
+                              <i class="material-icons float-xs-left">delete</i>
                             </button>
                             <div class="quantity-selector">
                               <button class="btn-quantity minus" data-product-id="${
@@ -662,10 +625,10 @@ $(document).ready(function () {
 
   $(document).on("click", ".order", function (e) {
     e.preventDefault();
-    addToCart(prestashop.urls.pages.order);
+    addToCart(prestashop.urls.pages.order + "?action=show");
   });
 
-  function addToCart(redirectUrl = prestashop.urls.pages.cart) {
+  function addToCart(redirectUrl) {
     if (!selectedProducts || selectedProducts.length === 0) {
       console.warn("No products selected to add to the cart.");
       return;
@@ -680,6 +643,7 @@ $(document).ready(function () {
       // Prepare custom data to associate the product with the main product
       const customFields = {
         main_product_id: mainProductId, // Main product ID for association
+        quantity: product.quantity, // Main product ID for association
         is_associated: true, // Mark as associated with a main product
       };
 
@@ -743,8 +707,11 @@ $(document).ready(function () {
         });
 
       // clearSelectedProducts(productId);
-
-      window.location.href = redirectUrl;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      }else{
+        window.location.reload();
+      }
 
       // Hide the popup
       $selectedProductsPopup.removeClass("visible");
