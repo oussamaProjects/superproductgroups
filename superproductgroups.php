@@ -460,45 +460,64 @@ class SuperProductGroups extends Module
     $cartId = $this->context->cart->id;
     $languageId = (int)$this->context->language->id;
 
-    // Fetch custom fields, super product names, and product names for the cart
-    $customFields = Db::getInstance()->executeS(
-      '
-      SELECT
-          ccf.id_product,
-          pl.name AS product_name,
-          pl_super.name AS super_product_name,
-          JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) AS main_product_id
-      FROM ' . _DB_PREFIX_ . 'cart_custom_fields ccf
-      INNER JOIN ' . _DB_PREFIX_ . 'product_lang pl
-          ON ccf.id_product = pl.id_product
-      LEFT JOIN ' . _DB_PREFIX_ . 'product_lang pl_super
-          ON JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) = pl_super.id_product
-      INNER JOIN ' . _DB_PREFIX_ . 'cart_product cp
-          ON ccf.id_product = cp.id_product AND cp.id_cart = ccf.id_cart
-      WHERE ccf.id_cart = ' . (int)$cartId . '
-        AND pl.id_lang = ' . (int)$languageId . '
-        AND pl_super.id_lang = ' . (int)$languageId . '
-      GROUP BY ccf.id_product, main_product_id
-      '
-    );
+    // Fetch the cart custom fields
+    $customFields = $this->getCartCustomFields($cartId, $languageId);
 
-    // Format data for easy access in the template
-    $customFieldsByProduct = [];
-    print_r($customFields);
-    die;
-    foreach ($customFields as $field) {
-      $customFieldsByProduct[] = [
-        'product_name' => $field['product_name'], // Super product name
-        'super_product_name' => $field['super_product_name'], // Super product name
-      ];
-    }
+    // Format data for easy use in the template
+    $customFieldsByProduct = $this->formatCustomFieldsData($customFields);
 
     // Assign data to Smarty
     $this->context->smarty->assign([
       'customFieldsByProduct' => $customFieldsByProduct,
     ]);
 
+    // Return the custom template
     return $this->display(__FILE__, 'views/templates/front/cart_super_products.tpl');
+  }
+
+  /**
+   * Fetch custom fields for the cart, including product and super product names.
+   */
+  private function getCartCustomFields($cartId, $languageId)
+  {
+    $query = '
+        SELECT
+            ccf.id_product,
+            pl.name AS product_name,
+            COALESCE(pl_super.name, "Unassociated") AS super_product_name,
+            JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) AS main_product_id,
+            SUM(CAST(JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.quantity")) AS UNSIGNED)) AS total_quantity
+        FROM ' . _DB_PREFIX_ . 'cart_custom_fields ccf
+        INNER JOIN ' . _DB_PREFIX_ . 'product_lang pl
+            ON ccf.id_product = pl.id_product
+        LEFT JOIN ' . _DB_PREFIX_ . 'product_lang pl_super
+            ON JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) = pl_super.id_product
+            AND pl_super.id_lang = ' . (int)$languageId . '
+        LEFT JOIN ' . _DB_PREFIX_ . 'cart_product cp
+            ON ccf.id_product = cp.id_product AND cp.id_cart = ccf.id_cart
+        WHERE ccf.id_cart = ' . (int)$cartId . '
+          AND pl.id_lang = ' . (int)$languageId . ' 
+        GROUP BY ccf.id_product, main_product_id
+    ';
+
+    return Db::getInstance()->executeS($query);
+  }
+
+  /**
+   * Format custom fields for easier use in templates.
+   */
+  private function formatCustomFieldsData($customFields)
+  {
+    $formattedData = [];
+    foreach ($customFields as $field) {
+      $formattedData[] = [
+        'product_name' => $field['product_name'],
+        'super_product_name' => $field['super_product_name'],
+        'main_product_id' => $field['main_product_id'],
+        'total_quantity' => $field['total_quantity'],
+      ];
+    }
+    return $formattedData;
   }
 
   public function hookActionValidateOrder($params)
