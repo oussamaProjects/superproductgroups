@@ -3,6 +3,7 @@
     <tr>
       <th>Super Product</th>
       <th>Product</th>
+      <th>Quantity</th>
     </tr>
   </thead>
   <tbody>
@@ -17,6 +18,9 @@
         </td>
         <td>
           {$super_product['product_name']}
+        </td>
+        <td>
+          {$super_product['total_quantity']}
         </td>
       </tr>
     {/foreach}

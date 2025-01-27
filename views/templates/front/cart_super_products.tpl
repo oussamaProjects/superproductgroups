@@ -3,6 +3,7 @@
     <tr>
       <th>Super Product</th>
       <th>Product</th>
+      <th>Quantity</th>
     </tr>
   </thead>
   <tbody>
