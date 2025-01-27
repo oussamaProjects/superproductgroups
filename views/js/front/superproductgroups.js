@@ -19,21 +19,20 @@ $(document).ready(function () {
   // $add_to_cart.hide();
 
   const bodyClass = $("body").attr("class");
-  const productIdMatch = bodyClass.match(/product-id-(\d+)/);
+  const superProductIdMatch = bodyClass.match(/product-id-(\d+)/);
 
-  var productId = 0;
+  var superProductId = 0;
 
-  if (productIdMatch && productIdMatch[1]) {
-    productId = productIdMatch[1];
-    console.log("Extracted Product ID:", productId);
+  if (superProductIdMatch && superProductIdMatch[1]) {
+    superProductId = superProductIdMatch[1];
     // Proceed with your logic using productId
-    checkProductGroups(productId);
-    getSelectedProducts(productId);
+    checkProductGroups(superProductId);
+    getSelectedProducts(superProductId);
   } else {
     console.warn("No product ID found in body class.");
   }
 
-  function checkProductGroups(productId) {
+  function checkProductGroups(superProductId) {
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=CheckProductHasGroups";
@@ -41,10 +40,9 @@ $(document).ready(function () {
     $.ajax({
       url: ajaxUrl,
       type: "POST",
-      data: { id_product: productId },
+      data: { id_super_product: superProductId },
       success: function (response) {
         const res = JSON.parse(response);
-        console.log("checkProductGroups res", res);
 
         if (res.status === "success" && res.hasGroups) {
           $("body").addClass("has-product-groups");
@@ -58,24 +56,22 @@ $(document).ready(function () {
     });
   }
 
-  function saveSelectedProducts(productId, products) {
+  function saveSelectedProducts(superProductId, products) {
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=SaveSelectedProducts";
-
-    // console.log("Saving products to:", ajaxUrl);
 
     $.ajax({
       url: ajaxUrl,
       type: "POST",
       data: {
         selectedProducts: products,
-        id_product: productId,
+        id_super_product: superProductId,
       },
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
-          // console.log("Products saved successfully:", res.message);
+          console.warn("Products saved successfully:", res.message);
         } else {
           console.error("Error saving products:", res.message);
         }
@@ -86,23 +82,19 @@ $(document).ready(function () {
     });
   }
 
-  function getSelectedProducts(productId) {
+  function getSelectedProducts(superProductId) {
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=GetSelectedProducts";
 
-    // console.log("Fetching products from:", ajaxUrl);
-
     $.ajax({
       url: ajaxUrl,
       type: "POST",
-      data: { id_product: productId },
+      data: { id_super_product: superProductId },
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
-          console.log("Loaded selected products:", res.selectedProducts);
           selectedProducts = res.selectedProducts;
-
           initProductActions();
         } else {
           console.error("Error retrieving products:", res.message);
@@ -114,7 +106,7 @@ $(document).ready(function () {
     });
   }
 
-  function clearSelectedProducts(productId) {
+  function clearSelectedProducts(superProductId) {
     const ajaxUrl =
       prestashop.urls.base_url +
       "index.php?fc=module&module=superproductgroups&controller=groupproduct&action=ClearSelectedProducts";
@@ -122,11 +114,11 @@ $(document).ready(function () {
     $.ajax({
       url: ajaxUrl,
       type: "POST",
-      data: { id_product: productId },
+      data: { id_super_product: superProductId },
       success: function (response) {
         const res = JSON.parse(response);
         if (res.status === "success") {
-          // console.log("Selected products cleared:", res.message);
+          console.warn("Selected products cleared:", res.message);
         } else {
           console.error("Error clearing selected products:", res.message);
         }
@@ -239,7 +231,6 @@ $(document).ready(function () {
     const products = $(this).data("products");
     const id_group = $(this).data("id_group");
     const name_group = $(this).data("name_group");
-    // console.log("products", products);
     $(".selected-group-name").html(name_group);
 
     // .list-super-product-groups-images li data id_group == $(this).data("id_group") add border css
@@ -411,8 +402,6 @@ $(document).ready(function () {
     const searchQuery = $(inputElement).val().toLowerCase();
     const $productItems = $groupProductsContainer.find(".custom-product");
 
-    // console.log("$productItems", $productItems);
-
     $productItems.each(function () {
       const $item = $(this);
       const productNameOrCode = $item.find(selector).text().toLowerCase();
@@ -441,7 +430,6 @@ $(document).ready(function () {
     //     selectedProducts.push(product);
     //   }
     // });
-    // console.log("newlySelectedProducts", newlySelectedProducts);
 
     // Updateproducts without replacing existing ones
     newlySelectedProducts.forEach((product) => {
@@ -456,11 +444,9 @@ $(document).ready(function () {
       }
     });
 
-    // console.log("Selected Products:", selectedProducts); // Replace with your logic
-
     // Hide the popup
     initProductActions();
-    saveSelectedProducts(productId, selectedProducts);
+    saveSelectedProducts(superProductId, selectedProducts);
 
     $groupPopup.removeClass("visible");
   });
@@ -468,8 +454,6 @@ $(document).ready(function () {
   // Open the selected products popup
   $(document).on("click", ".js-view-selected-products", function (e) {
     e.preventDefault();
-
-    // console.log("Selected Groups:", Object.values(groupedProducts)); // Replace with your logic
 
     if (groupedProducts) {
       const selectedHtml = Object.values(groupedProducts)
@@ -552,11 +536,9 @@ $(document).ready(function () {
 
     // Update the input field
     input.val(newQuantity);
-    // console.log("productId", productId);
 
     // Find the product in the `selectedProducts` array and update its quantity
     const productIndex = selectedProducts.findIndex((p) => p.id == productId);
-    // console.log("productIndex", productIndex);
 
     if (productIndex !== -1) {
       selectedProducts[productIndex].quantity = newQuantity;
@@ -589,10 +571,9 @@ $(document).ready(function () {
         )
         .toFixed(2)} €`
     );
-    saveSelectedProducts(productId, selectedProducts);
+    saveSelectedProducts(superProductId, selectedProducts);
     initProductActions();
 
-    // console.log("Updated selectedProducts:", selectedProducts); // Debugging output
   });
 
   $selectedProductsPopup.on("click", ".btn-delete", function (e) {
@@ -613,7 +594,9 @@ $(document).ready(function () {
         )
         .toFixed(2)} €`
     );
-    saveSelectedProducts(productId, selectedProducts);
+   
+    saveSelectedProducts(superProductId, selectedProducts);
+     
     initProductActions();
   });
 
@@ -637,12 +620,10 @@ $(document).ready(function () {
     const totalProducts = selectedProducts.length;
     let addedProducts = 0;
 
-    const mainProductId = productId; // The ID of the main (super) pro
-
     const addToCart = (product) => {
       // Prepare custom data to associate the product with the main product
       const customFields = {
-        main_product_id: mainProductId, // Main product ID for association
+        super_product_id: superProductId, // Main product ID for association
         quantity: product.quantity, // Main product ID for association
         is_associated: true, // Mark as associated with a main product
       };
@@ -661,7 +642,6 @@ $(document).ready(function () {
           custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
         },
         success: function () {
-          console.log(`Product ${product.name} added to cart successfully.`);
           addedProducts++;
 
           // Check if all products are added
@@ -706,7 +686,7 @@ $(document).ready(function () {
           $(this).remove(); // Remove the message after fading out
         });
 
-      // clearSelectedProducts(productId);
+      // clearSelectedProducts(superProductId);
       if (redirectUrl) {
         window.location.href = redirectUrl;
       }else{

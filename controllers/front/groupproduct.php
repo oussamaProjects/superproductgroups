@@ -32,12 +32,12 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
 
   public function checkProductHasGroups()
   {
-    $productId = (int) Tools::getValue('id_product');
+    $superProductId = (int) Tools::getValue('id_super_product');
 
-    if (!$productId) {
+    if (!$superProductId) {
       die(json_encode(['status' => 'error', 'message' => 'No product ID provided.']));
     }
-    $groups = $this->module->getThisProductGroupsWithProducts($productId);
+    $groups = $this->module->getThisProductGroupsWithProducts($superProductId);
 
     if (!empty($groups)) {
       die(json_encode(['status' => 'success', 'hasGroups' => true]));
@@ -48,11 +48,15 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
   private function saveSelectedProducts()
   {
     $selectedProducts = Tools::getValue('selectedProducts');
-    $productId = (int) Tools::getValue('id_product');
+    $superProductId = (int) Tools::getValue('id_super_product');
 
     // Validate input
-    if (!is_array($selectedProducts) || !$productId) {
-      die(json_encode(['status' => 'error', 'message' => 'Invalid data format or missing product ID.']));
+    if (!$superProductId) {
+      die(json_encode(['status' => 'error', 'message' => 'Missing product ID.']));
+    }
+
+    if (!is_array($selectedProducts)) {
+      $selectedProducts = [];
     }
 
     // Start or resume the session
@@ -66,16 +70,16 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
     }
 
     // Update or set the selected products for the specific product ID
-    $_SESSION['selected_products'][$productId] = $selectedProducts;
+    $_SESSION['selected_products'][$superProductId] = $selectedProducts;
 
     die(json_encode(['status' => 'success', 'message' => 'Products saved successfully.']));
   }
 
   private function getSelectedProducts()
   {
-    $productId = (int) Tools::getValue('id_product');
+    $superProductId = (int) Tools::getValue('id_super_product');
 
-    if (!$productId) {
+    if (!$superProductId) {
       die(json_encode(['status' => 'error', 'message' => 'Missing product ID.']));
     }
 
@@ -88,16 +92,16 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
     $allProducts = $_SESSION['selected_products'] ?? [];
 
     // Fetch selected products for the given product ID
-    $selectedProducts = $allProducts[$productId] ?? [];
+    $selectedProducts = $allProducts[$superProductId] ?? [];
 
     die(json_encode(['status' => 'success', 'selectedProducts' => $selectedProducts]));
   }
 
   private function clearSelectedProducts()
   {
-    $productId = (int) Tools::getValue('id_product');
+    $superProductId = (int) Tools::getValue('id_super_product');
 
-    if (!$productId) {
+    if (!$superProductId) {
       die(json_encode(['status' => 'error', 'message' => 'Missing product ID.']));
     }
 
@@ -107,8 +111,8 @@ class SuperproductgroupsGroupproductModuleFrontController extends ModuleFrontCon
     }
 
     // Remove selected products for the given product ID
-    if (isset($_SESSION['selected_products'][$productId])) {
-      unset($_SESSION['selected_products'][$productId]);
+    if (isset($_SESSION['selected_products'][$superProductId])) {
+      unset($_SESSION['selected_products'][$superProductId]);
     }
 
     die(json_encode(['status' => 'success', 'message' => 'Selected products cleared successfully.']));

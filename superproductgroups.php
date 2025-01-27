@@ -387,11 +387,11 @@ class SuperProductGroups extends Module
       }
     }
 
-    // Initialize customFields if empty or missing main_product_id
-    if (empty($customFields) || empty($customFields['main_product_id'])) {
+    // Initialize customFields if empty or missing super_product_id
+    if (empty($customFields) || empty($customFields['super_product_id'])) {
 
       $customFields = [
-        'main_product_id' => 0, // Default value for main_product_id
+        'super_product_id' => 0, // Default value for super_product_id
         // 'quantity' => $productQuantity,
         'quantity' => 1,
         'is_associated' => false, // Default value indicating no association
@@ -403,10 +403,10 @@ class SuperProductGroups extends Module
     //   $customFields['quantity'] = $productQuantity;
     // }
 
-    // If a product ID is provided, remove duplicates for the same main_product_id
+    // If a product ID is provided, remove duplicates for the same super_product_id
     if ($currentProductId) {
-      // $this->removeProductsFromCartByProductAndMainProduct($cart->id, $currentProductId, $customFields['main_product_id']);
-      // $this->deleteCustomFieldsByProductAndMainProduct($cart->id, $currentProductId, $customFields['main_product_id']);
+      // $this->removeProductsFromCartByProductAndMainProduct($cart->id, $currentProductId, $customFields['super_product_id']);
+      // $this->deleteCustomFieldsByProductAndMainProduct($cart->id, $currentProductId, $customFields['super_product_id']);
     }
 
     // Save the custom fields for the current product
@@ -418,7 +418,7 @@ class SuperProductGroups extends Module
 
   private function removeProductsFromCartByProductAndMainProduct($cartId, $productId, $mainProductId)
   {
-    // Delete the specific product with the given main_product_id
+    // Delete the specific product with the given super_product_id
     Db::getInstance()->delete(
       'cart_product',
       'id_cart = ' . (int)$cartId . '
@@ -427,19 +427,19 @@ class SuperProductGroups extends Module
             SELECT id_product
             FROM ' . _DB_PREFIX_ . 'cart_custom_fields
             WHERE id_cart = ' . (int)$cartId . '
-              AND JSON_UNQUOTE(JSON_EXTRACT(custom_fields, "$.main_product_id")) = ' . (int)$mainProductId . '
+              AND JSON_UNQUOTE(JSON_EXTRACT(custom_fields, "$.super_product_id")) = ' . (int)$mainProductId . '
          )'
     );
   }
 
   private function deleteCustomFieldsByProductAndMainProduct($cartId, $productId, $mainProductId)
   {
-    // Delete the custom fields for the specific product with the given main_product_id
+    // Delete the custom fields for the specific product with the given super_product_id
     Db::getInstance()->delete(
       'cart_custom_fields',
       'id_cart = ' . (int)$cartId . '
          AND id_product = ' . (int)$productId . '
-         AND JSON_UNQUOTE(JSON_EXTRACT(custom_fields, "$.main_product_id")) = ' . (int)$mainProductId
+         AND JSON_UNQUOTE(JSON_EXTRACT(custom_fields, "$.super_product_id")) = ' . (int)$mainProductId
     );
   }
 
@@ -485,19 +485,19 @@ class SuperProductGroups extends Module
             ccf.id_product,
             pl.name AS product_name,
             COALESCE(pl_super.name, "Unassociated") AS super_product_name,
-            JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) AS main_product_id,
+            JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.super_product_id")) AS super_product_id,
             SUM(CAST(JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.quantity")) AS UNSIGNED)) AS total_quantity
         FROM ' . _DB_PREFIX_ . 'cart_custom_fields ccf
         INNER JOIN ' . _DB_PREFIX_ . 'product_lang pl
             ON ccf.id_product = pl.id_product
         LEFT JOIN ' . _DB_PREFIX_ . 'product_lang pl_super
-            ON JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) = pl_super.id_product
+            ON JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.super_product_id")) = pl_super.id_product
             AND pl_super.id_lang = ' . (int)$languageId . '
         LEFT JOIN ' . _DB_PREFIX_ . 'cart_product cp
             ON ccf.id_product = cp.id_product AND cp.id_cart = ccf.id_cart
         WHERE ccf.id_cart = ' . (int)$cartId . '
-          AND pl.id_lang = ' . (int)$languageId . ' 
-        GROUP BY ccf.id_product, main_product_id
+          AND pl.id_lang = ' . (int)$languageId . '
+        GROUP BY ccf.id_product, super_product_id
     ';
 
     return Db::getInstance()->executeS($query);
@@ -513,7 +513,7 @@ class SuperProductGroups extends Module
       $formattedData[] = [
         'product_name' => $field['product_name'],
         'super_product_name' => $field['super_product_name'],
-        'main_product_id' => $field['main_product_id'],
+        'super_product_id' => $field['super_product_id'],
         'total_quantity' => $field['total_quantity'],
       ];
     }
@@ -537,19 +537,19 @@ class SuperProductGroups extends Module
   {
       $orderId = (int) $params['id_order'];
       $languageId = (int)$this->context->language->id;
-  
+
       // Fetch the cartId associated with the order
       $cartId = Db::getInstance()->getValue(
           'SELECT id_cart
            FROM ' . _DB_PREFIX_ . 'orders
            WHERE id_order = ' . $orderId
       );
-  
+
       if (!$cartId) {
           // If no cart ID is found, stop execution
           return '<p>No cart associated with this order.</p>';
       }
-  
+
       // Fetch custom fields, super product names, and product names for the cart
       $customFields = Db::getInstance()->executeS(
           '
@@ -557,38 +557,38 @@ class SuperProductGroups extends Module
               ccf.id_product,
               pl.name AS product_name,
               COALESCE(pl_super.name, "Unassociated") AS super_product_name,
-              JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) AS main_product_id,
+              JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.super_product_id")) AS super_product_id,
               SUM(CAST(JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.quantity")) AS UNSIGNED)) AS total_quantity
           FROM ' . _DB_PREFIX_ . 'cart_custom_fields ccf
           INNER JOIN ' . _DB_PREFIX_ . 'product_lang pl
               ON ccf.id_product = pl.id_product
           LEFT JOIN ' . _DB_PREFIX_ . 'product_lang pl_super
-              ON JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.main_product_id")) = pl_super.id_product
+              ON JSON_UNQUOTE(JSON_EXTRACT(ccf.custom_fields, "$.super_product_id")) = pl_super.id_product
               AND pl_super.id_lang = ' . (int)$languageId . '
           INNER JOIN ' . _DB_PREFIX_ . 'cart_product cp
               ON ccf.id_product = cp.id_product AND cp.id_cart = ccf.id_cart
           WHERE ccf.id_cart = ' . (int)$cartId . '
             AND pl.id_lang = ' . (int)$languageId . '
-          GROUP BY ccf.id_product, main_product_id
+          GROUP BY ccf.id_product, super_product_id
           '
       );
-  
+
       // Format data for easy access in the template
       $products = [];
       foreach ($customFields as $field) {
           $products[] = [
               'product_name' => $field['product_name'], // Product name
               'super_product_name' => $field['super_product_name'], // Super product name
-              'main_product_id' => $field['main_product_id'], // Main product ID
+              'super_product_id' => $field['super_product_id'], // Main product ID
               'total_quantity' => $field['total_quantity'], // Total quantity
           ];
       }
-  
+
       // Assign data to Smarty
       $this->context->smarty->assign([
           'orderProducts' => $products,
       ]);
-  
+
       // Display the custom template
       return $this->display(__FILE__, 'views/templates/admin/order_products_groups.tpl');
   }
