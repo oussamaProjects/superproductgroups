@@ -28,7 +28,7 @@ CREATE TABLE
         INDEX (`id_order`, `id_super_product`)
     ) ENGINE = ENGINE_TYPE DEFAULT CHARSET = utf8;
 
-CREATE TABLE IF NOT EXISTS `PREFIX_cart_custom_fields` (
+CREATE TABLE IF NOT EXISTS `PREFIX_superproduct_cart_custom_fields` (
     `id_cart_custom_field` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
     `id_cart` INT(11) UNSIGNED NOT NULL,
     `id_product` INT(11) UNSIGNED NOT NULL,
