@@ -363,56 +363,60 @@ class SuperProductGroups extends Module
 
   public function hookActionCartSave($params)
   {
-    if (!isset($this->context->cart) || !$this->context->cart->id) {
-      return;
-    }
+    try {
+      if (!isset($this->context->cart) || !$this->context->cart->id) {
+        return;
+      }
 
-    $cart = $this->context->cart;
-    $rawCustomFields = Tools::getValue('custom_fields');
+      $cart = $this->context->cart;
+      $rawCustomFields = Tools::getValue('custom_fields');
 
-    // Decode the custom fields
-    $customFields = $rawCustomFields ? json_decode($rawCustomFields, true) : null;
-    // Get the current product ID
-    $currentProductId = Tools::getValue('id_product');
+      // Decode the custom fields
+      $customFields = $rawCustomFields ? json_decode($rawCustomFields, true) : null;
+      // Get the current product ID
+      $currentProductId = Tools::getValue('id_product');
 
-    // Fetch the quantity of the current product from the cart
-    $productQuantity = 1; // Default to 1
-    if ($currentProductId) {
-      $productsInCart = $cart->getProducts();
-      foreach ($productsInCart as $product) {
-        if ((int)$product['id_product'] === (int)$currentProductId) {
-          $productQuantity = (int)$product['cart_quantity'];
-          break;
+      // Fetch the quantity of the current product from the cart
+      $productQuantity = 1; // Default to 1
+      if ($currentProductId) {
+        $productsInCart = $cart->getProducts();
+        foreach ($productsInCart as $product) {
+          if ((int)$product['id_product'] === (int)$currentProductId) {
+            $productQuantity = (int)$product['cart_quantity'];
+            break;
+          }
         }
       }
-    }
 
-    // Initialize customFields if empty or missing super_product_id
-    if (empty($customFields) || empty($customFields['super_product_id'])) {
+      // Initialize customFields if empty or missing super_product_id
+      if (empty($customFields) || empty($customFields['super_product_id'])) {
 
-      $customFields = [
-        'super_product_id' => 0, // Default value for super_product_id
-        // 'quantity' => $productQuantity,
-        'quantity' => 1,
-        'is_associated' => false, // Default value indicating no association
-      ];
+        $customFields = [
+          'super_product_id' => 0, // Default value for super_product_id
+          // 'quantity' => $productQuantity,
+          'quantity' => 1,
+          'is_associated' => false, // Default value indicating no association
+        ];
 
-      error_log('Custom Fields initialized with default data: ' . print_r($customFields, true));
-    }
-    // else{
-    //   $customFields['quantity'] = $productQuantity;
-    // }
+        error_log('Custom Fields initialized with default data: ' . print_r($customFields, true));
+      }
+      // else{
+      //   $customFields['quantity'] = $productQuantity;
+      // }
 
-    // If a product ID is provided, remove duplicates for the same super_product_id
-    if ($currentProductId) {
-      // $this->removeProductsFromCartByProductAndMainProduct($cart->id, $currentProductId, $customFields['super_product_id']);
-      // $this->deleteCustomFieldsByProductAndMainProduct($cart->id, $currentProductId, $customFields['super_product_id']);
-    }
+      // If a product ID is provided, remove duplicates for the same super_product_id
+      if ($currentProductId) {
+        // $this->removeProductsFromCartByProductAndMainProduct($cart->id, $currentProductId, $customFields['super_product_id']);
+        // $this->deleteCustomFieldsByProductAndMainProduct($cart->id, $currentProductId, $customFields['super_product_id']);
+      }
 
-    // Save the custom fields for the current product
-    $currentProductId = Tools::getValue('id_product');
-    if ($currentProductId) {
-      $this->saveCustomFieldsToCart($cart->id, $currentProductId, $customFields);
+      // Save the custom fields for the current product
+      $currentProductId = Tools::getValue('id_product');
+      if ($currentProductId) {
+        $this->saveCustomFieldsToCart($cart->id, $currentProductId, $customFields);
+      }
+    } catch (Exception $e) {
+      error_log('Error saving custom fields to cart: ' . $e->getMessage());
     }
   }
 
@@ -535,24 +539,24 @@ class SuperProductGroups extends Module
 
   public function hookDisplayAdminOrderMain($params)
   {
-      $orderId = (int) $params['id_order'];
-      $languageId = (int)$this->context->language->id;
+    $orderId = (int) $params['id_order'];
+    $languageId = (int)$this->context->language->id;
 
-      // Fetch the cartId associated with the order
-      $cartId = Db::getInstance()->getValue(
-          'SELECT id_cart
+    // Fetch the cartId associated with the order
+    $cartId = Db::getInstance()->getValue(
+      'SELECT id_cart
            FROM ' . _DB_PREFIX_ . 'orders
            WHERE id_order = ' . $orderId
-      );
+    );
 
-      if (!$cartId) {
-          // If no cart ID is found, stop execution
-          return '<p>No cart associated with this order.</p>';
-      }
+    if (!$cartId) {
+      // If no cart ID is found, stop execution
+      return '<p>No cart associated with this order.</p>';
+    }
 
-      // Fetch custom fields, super product names, and product names for the cart
-      $customFields = Db::getInstance()->executeS(
-          '
+    // Fetch custom fields, super product names, and product names for the cart
+    $customFields = Db::getInstance()->executeS(
+      '
           SELECT
               ccf.id_product,
               pl.name AS product_name,
@@ -571,25 +575,25 @@ class SuperProductGroups extends Module
             AND pl.id_lang = ' . (int)$languageId . '
           GROUP BY ccf.id_product, super_product_id
           '
-      );
+    );
 
-      // Format data for easy access in the template
-      $products = [];
-      foreach ($customFields as $field) {
-          $products[] = [
-              'product_name' => $field['product_name'], // Product name
-              'super_product_name' => $field['super_product_name'], // Super product name
-              'super_product_id' => $field['super_product_id'], // Main product ID
-              'total_quantity' => $field['total_quantity'], // Total quantity
-          ];
-      }
+    // Format data for easy access in the template
+    $products = [];
+    foreach ($customFields as $field) {
+      $products[] = [
+        'product_name' => $field['product_name'], // Product name
+        'super_product_name' => $field['super_product_name'], // Super product name
+        'super_product_id' => $field['super_product_id'], // Main product ID
+        'total_quantity' => $field['total_quantity'], // Total quantity
+      ];
+    }
 
-      // Assign data to Smarty
-      $this->context->smarty->assign([
-          'orderProducts' => $products,
-      ]);
+    // Assign data to Smarty
+    $this->context->smarty->assign([
+      'orderProducts' => $products,
+    ]);
 
-      // Display the custom template
-      return $this->display(__FILE__, 'views/templates/admin/order_products_groups.tpl');
+    // Display the custom template
+    return $this->display(__FILE__, 'views/templates/admin/order_products_groups.tpl');
   }
 }

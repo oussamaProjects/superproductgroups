@@ -363,6 +363,10 @@
   /* max-width: 128px; */
 }
 
+.product-label a {
+  display: block;
+}
+
 .product-price {
   color: #1d1060;
   font-family: Poppins, sans-serif;
@@ -392,7 +396,7 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background: url(/img/cms/icones/validation.png) no-repeat 0 0 #56C074;
+  background: url(/img/cms/icones/validation.png) no-repeat 0 0 #56c074;
   background-size: 19px;
 }
 
@@ -405,6 +409,7 @@
   border-radius: 5px;
   height: 148px;
   overflow: auto;
+  width: 350px;
 }
 
 .side-popup-after-body .selected-groups-list .group {
@@ -616,13 +621,14 @@
   margin: 0 1px;
 }
 
-.isLogged_0 .public-price {
+.isLogged_1 .public-price {
   display: none;
 }
 
 .has-product-groups .page-content {
   display: flex;
   flex-direction: row;
+  align-items: flex-start;
   gap: 8px;
 }
 
@@ -631,8 +637,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   background: #fff;
   border: 1px solid #cfcfcf;
+}
+
+.has-product-groups .images-container .selected-group-name {
+  font-size: 14px;
+  font-family: Poppins, sans-serif;
+  padding: 4px;
+  color: #fff;
+  background-color: #1d1060;
+  width: 100%;
+  text-align: center;
+}
+
+.has-product-groups .images-container .selected-image {
+  background-color: #fff;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .has-product-groups .images-container img {

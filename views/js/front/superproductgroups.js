@@ -244,7 +244,15 @@ $(document).ready(function () {
       $(
         `.list-super-product-groups-images li[data-id_group="${id_group}"] img`
       ).attr("src") || "DEFAULT_IMAGE";
-    $(".images-container").html(`<img src="${groupImage}" alt="Group Image">`);
+
+    const imagesContainer = `
+      <div class="selected-group-name">${name_group}</div>
+      <div class="selected-image">
+        <img src="${groupImage}" alt="Group Image">
+      </div>
+    `;
+
+    $(".images-container").html(imagesContainer);
 
     // Populate the popup with products
     if (products && products.length > 0) {
@@ -351,13 +359,11 @@ $(document).ready(function () {
     const product = checkbox.closest(".custom-product");
 
     // product.find(".product-count").text(newQuantity);
-    product
-      .find(".product-price")
-      .html(
-        `${totalPrice.toFixed(
-          2
-        )} €<span class="public-price">PRIX PUBLIC</span>`
-      );
+    product.find(".product-price").html(
+      `${totalPrice.toFixed(2)} €<span class="public-price">PRIX PUBLIC</span>
+        <span class="stock">Stock: ${productData.stock_quantity}</span>
+          `
+    );
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
@@ -573,7 +579,6 @@ $(document).ready(function () {
     );
     saveSelectedProducts(superProductId, selectedProducts);
     initProductActions();
-
   });
 
   $selectedProductsPopup.on("click", ".btn-delete", function (e) {
@@ -594,9 +599,9 @@ $(document).ready(function () {
         )
         .toFixed(2)} €`
     );
-   
+
     saveSelectedProducts(superProductId, selectedProducts);
-     
+
     initProductActions();
   });
 
@@ -689,7 +694,7 @@ $(document).ready(function () {
       // clearSelectedProducts(superProductId);
       if (redirectUrl) {
         window.location.href = redirectUrl;
-      }else{
+      } else {
         window.location.reload();
       }
 
