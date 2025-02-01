@@ -484,6 +484,7 @@ class SuperProductGroups extends Module
   {
     $query = '
         SELECT
+            ccf.id_cart,
             ccf.id_product,
             pl.name AS product_name,
             COALESCE(pl_super.name, "Unassociated") AS super_product_name,
@@ -511,6 +512,7 @@ class SuperProductGroups extends Module
     $formattedData = [];
     foreach ($customFields as $field) {
       $formattedData[] = [
+        'id_cart' => $field['id_cart'],
         'product_name' => $field['product_name'],
         'super_product_name' => $field['super_product_name'],
         'super_product_id' => $field['super_product_id'],
