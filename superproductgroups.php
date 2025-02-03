@@ -459,22 +459,7 @@ class SuperProductGroups extends Module
 
   public function hookDisplayShoppingCart($params)
   {
-    $cartId = $this->context->cart->id;
-    $languageId = (int)$this->context->language->id;
-
-    // Fetch the cart custom fields
-    $customFields = $this->getCartCustomFields($cartId, $languageId);
-
-    // Format data for easy use in the template
-    $customFieldsByProduct = $this->formatCustomFieldsData($customFields);
-
-    // Assign data to Smarty
-    $this->context->smarty->assign([
-      'customFieldsByProduct' => $customFieldsByProduct,
-    ]);
-
-    // Return the custom template
-    return $this->display(__FILE__, 'views/templates/front/cart_super_products.tpl');
+    // return $this->display(__FILE__, 'views/templates/hook/cart.tpl');
   }
 
   /**
