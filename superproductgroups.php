@@ -361,10 +361,56 @@ class SuperProductGroups extends Module
     return $this->display(__FILE__, 'views/templates/front/group_list.tpl');
   }
 
+  /**
+   * Hook triggered when the cart updates product quantity.
+   */
+  public function hookActionCartUpdateQuantity($params)
+  {
+    $cartId = (int) $params['cart']->id;
+    $productId = (int) $params['id_product'];
+    $quantity = (int) $params['quantity'];
+
+    if (!$cartId || !$productId) {
+      return; // Exit if no cart or product ID is provided.
+    }
+
+    // Check if product exists in superproduct_cart_custom_fields
+    $superProductId = Db::getInstance()->getValue(
+      'SELECT id_super_product FROM ' . _DB_PREFIX_ . 'superproduct_cart_custom_fields
+          WHERE id_cart = ' . (int) $cartId . '
+          AND id_product = ' . (int) $productId
+    );
+
+    // If quantity is 0, remove the product from cart and associated table
+    if ($quantity <= 0) {
+
+      // Delete product from `superproduct_cart_custom_fields`
+      Db::getInstance()->delete(
+        'superproduct_cart_custom_fields',
+        'id_cart = ' . (int) $cartId . ' AND id_product = ' . (int) $productId
+      );
+
+      Db::getInstance()->delete(
+        'superproduct_cart_custom_fields',
+        'id_cart = ' . (int) $cartId . '
+          AND id_product != ' . (int) $productId
+      );
+    } else {
+
+      Db::getInstance()->update(
+        'superproduct_cart_custom_fields',
+        ['quantity' => (int) $quantity, 'date_upd' => date('Y-m-d H:i:s')],
+        'id_cart = ' . (int) $cartId . '
+        AND id_product = ' . (int) $productId . '
+        AND id_super_product = ' . (int) $superProductId
+      );
+    }
+  }
+
   public function hookActionCartSave($params)
   {
-    try {
 
+    try {
       if (!isset($this->context->cart) || !$this->context->cart->id) {
         return;
       }
@@ -380,7 +426,7 @@ class SuperProductGroups extends Module
       // Get the current product ID
 
       // Fetch the quantity of the current product from the cart
-      $productQuantity = 1; // Default to 1
+      $productQuantity = $quantity; // Default to 1
       if ($currentProductId) {
         $productsInCart = $cart->getProducts();
         foreach ($productsInCart as $product) {
@@ -394,12 +440,8 @@ class SuperProductGroups extends Module
       // Initialize customFields if empty or missing super_product_id
       if (empty($superProductID)) {
         $superProductID = 0;
-        $quantity = 1;
         error_log('Custom Fields initialized with default data: ' . print_r($customFields, true));
       }
-      // else{
-      // $quantity = $productQuantity;
-      // }
 
       // If a product ID is provided, remove duplicates for the same super_product_id
       if ($currentProductId) {
@@ -409,14 +451,14 @@ class SuperProductGroups extends Module
 
       // Save the custom fields for the current product
       if ($currentProductId) {
-        $this->saveCustomFieldsToCart($cart->id, $currentProductId, $superProductID, $quantity, $customFields);
+        $this->saveCustomFieldsToCart($cart->id, $currentProductId, $superProductID, $productQuantity, $customFields);
       }
     } catch (Exception $e) {
       error_log('Error saving custom fields to cart: ' . $e->getMessage());
     }
   }
 
-  private function removeProductsFromCartByProductAndMainProduct($cartId, $productId, $mainProductId)
+  private function removeProductsFromCartByProductAndMainProduct($cartId, $productId, $superProductId)
   {
     // Delete the specific product with the given super_product_id
     Db::getInstance()->delete(
@@ -427,84 +469,68 @@ class SuperProductGroups extends Module
             SELECT id_product
             FROM ' . _DB_PREFIX_ . 'superproduct_cart_custom_fields
             WHERE id_cart = ' . (int)$cartId . '
-            AND id_super_product = ' . (int)$mainProductId . '
+            AND id_super_product = ' . (int)$superProductId . '
          )'
     );
   }
 
-  private function deleteCustomFieldsByProductAndMainProduct($cartId, $productId, $mainProductId)
+  private function deleteCustomFieldsByProductAndMainProduct($cartId, $productId, $superProductId)
   {
     // Delete the custom fields for the specific product with the given super_product_id
     Db::getInstance()->delete(
       'superproduct_cart_custom_fields',
       'id_cart = ' . (int)$cartId . '
          AND id_product = ' . (int)$productId . '
-         AND id_super_product = ' . (int)$mainProductId
+         AND id_super_product = ' . (int)$superProductId
     );
   }
-
   private function saveCustomFieldsToCart($cartId, $productId, $superProductId, $quantity, $customFields)
   {
-    // Insert or update custom fields for the specific product
-    Db::getInstance()->insert('superproduct_cart_custom_fields', [
-      'id_cart' => (int) $cartId,
-      'id_product' => (int) $productId,
-      'id_super_product' => (int) $superProductId,
-      'quantity' => (int) $quantity,
-      'custom_fields' => pSQL(json_encode($customFields)),
-      'date_add' => date('Y-m-d H:i:s'),
-      'date_upd' => date('Y-m-d H:i:s'),
-    ]);
+    $db = Db::getInstance();
+
+    // Check if the record already exists
+    $existingEntry = $db->getRow(
+      'SELECT id_cart_custom_field, quantity FROM ' . _DB_PREFIX_ . 'superproduct_cart_custom_fields
+          WHERE id_cart = ' . (int) $cartId . '
+          AND id_product = ' . (int) $productId . '
+          AND id_super_product = ' . (int) $superProductId
+    );
+
+    if ($existingEntry) {
+      // Update existing record with new quantity
+      if ($quantity <= 0) {
+        $db->delete(
+          'superproduct_cart_custom_fields',
+          'id_cart_custom_field = ' . (int) $existingEntry['id_cart_custom_field']
+        );
+      } else {
+        $db->update(
+          'superproduct_cart_custom_fields',
+          [
+            'quantity' => $quantity,
+            'custom_fields' => pSQL(json_encode($customFields)),
+            'date_upd' => date('Y-m-d H:i:s'),
+          ],
+          'id_cart_custom_field = ' . (int) $existingEntry['id_cart_custom_field']
+        );
+      }
+    } else {
+      // Insert new record if it doesn't exist
+      $db->insert('superproduct_cart_custom_fields', [
+        'id_cart' => (int) $cartId,
+        'id_product' => (int) $productId,
+        'id_super_product' => (int) $superProductId,
+        'quantity' => (int) $quantity,
+        'custom_fields' => pSQL(json_encode($customFields)),
+        'date_add' => date('Y-m-d H:i:s'),
+        'date_upd' => date('Y-m-d H:i:s'),
+      ]);
+    }
   }
 
   public function hookDisplayShoppingCart($params)
   {
     // return $this->display(__FILE__, 'views/templates/hook/cart.tpl');
-  }
-
-  /**
-   * Fetch custom fields for the cart, including product and super product names.
-   */
-  private function getCartCustomFields($cartId, $languageId)
-  {
-    $query = '
-        SELECT
-            ccf.id_cart,
-            ccf.id_product,
-            pl.name AS product_name,
-            COALESCE(pl_super.name, "Unassociated") AS super_product_name,
-            ccf.id_super_product AS super_product_id,
-            SUM(ccf.quantity) AS total_quantity
-        FROM ' . _DB_PREFIX_ . 'superproduct_cart_custom_fields ccf
-        INNER JOIN ' . _DB_PREFIX_ . 'product_lang pl
-            ON ccf.id_product = pl.id_product AND pl.id_lang = ' . (int)$languageId . '
-        LEFT JOIN ' . _DB_PREFIX_ . 'product_lang pl_super
-            ON ccf.id_super_product = pl_super.id_product AND pl_super.id_lang = ' . (int)$languageId . '
-        LEFT JOIN ' . _DB_PREFIX_ . 'cart_product cp
-            ON ccf.id_product = cp.id_product AND cp.id_cart = ccf.id_cart
-        WHERE ccf.id_cart = ' . (int)$cartId . '
-        GROUP BY ccf.id_product, ccf.id_super_product
-    ';
-
-    return Db::getInstance()->executeS($query);
-  }
-
-  /**
-   * Format custom fields for easier use in templates.
-   */
-  private function formatCustomFieldsData($customFields)
-  {
-    $formattedData = [];
-    foreach ($customFields as $field) {
-      $formattedData[] = [
-        'id_cart' => $field['id_cart'],
-        'product_name' => $field['product_name'],
-        'super_product_name' => $field['super_product_name'],
-        'super_product_id' => $field['super_product_id'],
-        'total_quantity' => $field['total_quantity'],
-      ];
-    }
-    return $formattedData;
   }
 
   public function hookActionValidateOrder($params)

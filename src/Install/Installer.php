@@ -74,6 +74,7 @@ class Installer
       'displayAdminProductsExtra',
       'actionFrontControllerSetMedia',
       'displayProductAdditionalInfo',
+      'actionCartUpdateQuantity',
       'actionCartSave',
       'displayShoppingCart',
       'displayAdminOrderMain',

@@ -198,9 +198,9 @@ $(document).ready(function () {
                                  (Code: ${product.reference || "N/A"})
                               </div>
                               <div class="product-price">
-                              <span class="popup-price">
-                                ${parseFloat(product.price * product.quantity).toFixed(2)} €
-                              </span>
+                                <span class="popup-price">
+                                  ${parseFloat(product.price * product.quantity).toFixed(2)} €
+                                </span>
                               </div>
                             </div>
                           </div>`
@@ -313,8 +313,8 @@ $(document).ready(function () {
                   ${product.reference}
                 </div>
                 <div class="product-price">
-                  <span class="popup-price">${parseFloat(product.price).toFixed(2)} €</span> 
-                  <span class="public-price">PRIX PUBLIC</span> 
+                  <span class="popup-price">${parseFloat(product.price).toFixed(2)} € </span>
+                  <span class="public-price">PRIX PUBLIC</span>
                   <span class="stock">Stock: ${product.stock_quantity}</span>
                 </div>
 
@@ -360,9 +360,11 @@ $(document).ready(function () {
 
     // product.find(".product-count").text(newQuantity);
     product.find(".product-price").html(
-      `<span class="popup-price">${totalPrice.toFixed(2)} €</span>
-      <span class="public-price">PRIX PUBLIC</span>
-      <span class="stock">Stock: ${productData.stock_quantity}</span>`
+      `
+        ${totalPrice.toFixed(2)} €
+        <span class="public-price">PRIX PUBLIC</span>
+        <span class="stock">Stock: ${productData.stock_quantity}</span>
+          `
     );
 
     checkbox.attr("data-product", JSON.stringify(productData));
@@ -386,8 +388,9 @@ $(document).ready(function () {
     product
       .find(".product-price")
       .html(
-        `<span class="popup-price">${totalPrice.toFixed(2)} € </span>
-        <span class="public-price">PRIX PUBLIC</span>`
+        `${totalPrice.toFixed(
+          2
+        )} €<span class="public-price">PRIX PUBLIC</span>`
       );
 
     checkbox.attr("data-product", JSON.stringify(productData));
@@ -486,7 +489,9 @@ $(document).ready(function () {
                               (Code: ${product.reference || "N/A"})
                             </div>
                             <div class="product-price">
-                            <span class="popup-price">${parseFloat(product.price * product.quantity).toFixed(2)} € </span>
+                              <span class="popup-price">
+                                ${parseFloat(product.price * product.quantity).toFixed(2)} €
+                              </span>
                             </div>
                           </div>
 
@@ -564,7 +569,7 @@ $(document).ready(function () {
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
 
-    selectedProduct.find(".product-price").html(`<span class="popup-price">${totalPrice.toFixed(2)} €</span>`);
+    selectedProduct.find(".product-price").html(`${totalPrice.toFixed(2)} €`);
 
     selectedProduct.attr("data-product", JSON.stringify(productData));
 
@@ -643,6 +648,8 @@ $(document).ready(function () {
           id_customization: 0, // If customization is not required
           id_product_attribute: 0, // If no specific attribute is selected
           qty: product.quantity, // Adjust quantity as needed
+          id_super_product: superProductId, // If no specific attribute is selected
+          quantity: product.quantity, // Adjust quantity as needed
           custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
         },
         success: function () {

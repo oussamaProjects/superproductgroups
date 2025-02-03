@@ -32,6 +32,8 @@ CREATE TABLE IF NOT EXISTS `PREFIX_superproduct_cart_custom_fields` (
     `id_cart_custom_field` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
     `id_cart` INT(11) UNSIGNED NOT NULL,
     `id_product` INT(11) UNSIGNED NOT NULL,
+    `id_super_product` INT(11) UNSIGNED NOT NULL,
+    `quantity` INT(11) UNSIGNED NOT NULL DEFAULT 0,
     `custom_fields` TEXT NOT NULL,
     `date_add` DATETIME NOT NULL,
     `date_upd` DATETIME NOT NULL,
