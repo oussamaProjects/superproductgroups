@@ -7,10 +7,9 @@
 /* Group Item Styles */
 .list-super-product-groups {
   margin: 0px 0px 40px;
-  border: 1px solid #ababb6;
+  border: 1px solid #8d8d93;
   padding: 4px 8px 4px 24px;
   border-radius: 10px;
-  background-color: #fff;
   overflow: hidden;
 }
 
@@ -29,7 +28,7 @@
 }
 
 .list-super-product-groups li.list-super-product-group-item {
-  border-bottom: 1px solid #ababb6;
+  border-bottom: 1px solid #8d8d93;
   display: flex;
   padding: 12px 0px;
   justify-content: space-between;
@@ -171,6 +170,11 @@
 
 .side-popup.visible {
   right: 0;
+}
+
+.visible-wrapper {
+  overflow: hidden;
+  background: rgba(29, 16, 96, 0.35);
 }
 
 .btn-close {
@@ -380,6 +384,11 @@
   font-size: 10px;
 }
 
+.currency-symbol {
+  font-size: 0.85em !important;
+  vertical-align: text-top;
+}
+
 .product-input {
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -478,7 +487,7 @@
 }
 
 .custom-button:hover {
-  background: #ababb6;
+  background: #8d8d93;
 }
 
 .cart-success-message {

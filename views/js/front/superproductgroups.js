@@ -37,14 +37,24 @@ $(document).ready(function () {
    * Formats a price according to the PrestaShop locale and currency settings.
    * @param {number} amount - The price amount to format.
    * @returns {string} - The formatted price with the correct decimal separator and currency symbol.
-   */
+   */ 
   function formatPrice(amount) {
     amount = parseFloat(amount);
-    return amount.toLocaleString(prestashop.language.iso_code, {
+    if (isNaN(amount)) return "0.00"; // Handle invalid numbers
+  
+    // Get formatted price
+    let formattedPrice = amount.toLocaleString(prestashop.language.iso_code || "en-US", {
       style: "currency",
-      currency: prestashop.currency.iso_code,
+      currency: prestashop.currency.iso_code || "EUR", // Default to EUR if missing
       minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
+  
+    // Regex to extract currency symbol from formatted string
+    const currencySymbol = formattedPrice.replace(/[\d.,\s]+/g, "").trim();
+  
+    // Wrap currency symbol in a <span>
+    return formattedPrice.replace(currencySymbol, `<span class="currency-symbol">${currencySymbol}</span>`);
   }
 
   function checkProductGroups(superProductId) {
@@ -163,7 +173,7 @@ $(document).ready(function () {
       }, {});
 
       $(".total-info").css("display", "flex");
-      $(".total").text(
+      $(".total").html(
         formatPrice(
           selectedProducts.reduce(
             (acc, product) => acc + product.price * product.quantity,
@@ -585,7 +595,7 @@ $(document).ready(function () {
 
     selectedProduct.attr("data-product", JSON.stringify(productData));
 
-    $(".total").text(
+    $(".total").html(
       formatPrice(
         selectedProducts.reduce(
           (acc, product) => acc + product.price * product.quantity,
@@ -611,7 +621,7 @@ $(document).ready(function () {
     // delete the ui row of the product
     $(`#selected-product-${productId}`).remove();
 
-    $(".total").text(
+    $(".total").html(
       formatPrice(
         selectedProducts.reduce(
           (acc, product) => acc + product.price * product.quantity,
@@ -664,8 +674,6 @@ $(document).ready(function () {
           id_customization: 0, // If customization is not required
           id_product_attribute: 0, // If no specific attribute is selected
           qty: product.quantity, // Adjust quantity as needed
-          id_super_product: superProductId, // If no specific attribute is selected
-          quantity: product.quantity, // Adjust quantity as needed
           custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
         },
         success: function () {
