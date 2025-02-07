@@ -1,5 +1,6 @@
 $(document).ready(function () {
   const $groupPopup = $("#group-popup");
+  const $siteWrapper = $("#wrapper");
   const $groupProductsContainer = $("#group-products");
   const $productSearchInputNum = $("#group-product-search-num");
   const $productSearchInput = $("#group-product-search");
@@ -30,6 +31,20 @@ $(document).ready(function () {
     getSelectedProducts(superProductId);
   } else {
     console.warn("No product ID found in body class.");
+  }
+
+  /**
+   * Formats a price according to the PrestaShop locale and currency settings.
+   * @param {number} amount - The price amount to format.
+   * @returns {string} - The formatted price with the correct decimal separator and currency symbol.
+   */
+  function formatPrice(amount) {
+    amount = parseFloat(amount);
+    return amount.toLocaleString(prestashop.language.iso_code, {
+      style: "currency",
+      currency: prestashop.currency.iso_code,
+      minimumFractionDigits: 2,
+    });
   }
 
   function checkProductGroups(superProductId) {
@@ -148,25 +163,14 @@ $(document).ready(function () {
       }, {});
 
       $(".total-info").css("display", "flex");
-      // $(".sub-total").text(
-      //   `${selectedProducts
-      //     .reduce(
-      //       (acc, product) =>
-      //         acc + parseFloat(product.price) * product.quantity,
-      //       0
-      //     )
-      //     .toFixed(2)} €`
-      // );
       $(".total").text(
-        `${selectedProducts
-          .reduce(
-            (acc, product) =>
-              acc + parseFloat(product.price) * product.quantity,
+        formatPrice(
+          selectedProducts.reduce(
+            (acc, product) => acc + product.price * product.quantity,
             0
           )
-          .toFixed(2)} €`
+        )
       );
-
       // Create HTML for each group
       updateGroupListHtml();
     } else {
@@ -182,9 +186,9 @@ $(document).ready(function () {
         (group) =>
           `<div class="group" data-group="${group.id_group}">
                   <div class="group-name">${group.group_name}</div>
-                  <div class="group-total-price">${group.total_price.toFixed(
-                    2
-                  )} €</div>
+                  <div class="group-total-price">${formatPrice(
+                    group.total_price
+                  )}</div>
                    <span class="js-view-selected-products">Voir sélection</span>
                 <div class="hidden group-products">
                   ${group.products
@@ -198,9 +202,11 @@ $(document).ready(function () {
                                  (Code: ${product.reference || "N/A"})
                               </div>
                               <div class="product-price">
-                                <span class="popup-price">
-                                  ${parseFloat(product.price * product.quantity).toFixed(2)} €
-                                </span>
+                              <span class="popup-price">
+                                ${formatPrice(
+                                  product.price * product.quantity
+                                )}  
+                              </span>
                               </div>
                             </div>
                           </div>`
@@ -313,8 +319,10 @@ $(document).ready(function () {
                   ${product.reference}
                 </div>
                 <div class="product-price">
-                  <span class="popup-price">${parseFloat(product.price).toFixed(2)} € </span>
-                  <span class="public-price">PRIX PUBLIC</span>
+                  <span class="popup-price">
+                  ${formatPrice(product.price)}
+                  </span> 
+                  <span class="public-price">PRIX PUBLIC</span> 
                   <span class="stock">Stock: ${product.stock_quantity}</span>
                 </div>
 
@@ -331,6 +339,7 @@ $(document).ready(function () {
     // Show the popup
     $selectedProductsPopup.removeClass("visible");
     $groupPopup.addClass("visible");
+    $siteWrapper.addClass("visible-wrapper");
   });
 
   // Update quantity in data-product dynamically
@@ -361,10 +370,10 @@ $(document).ready(function () {
     // product.find(".product-count").text(newQuantity);
     product.find(".product-price").html(
       `
-        ${totalPrice.toFixed(2)} €
-        <span class="public-price">PRIX PUBLIC</span>
-        <span class="stock">Stock: ${productData.stock_quantity}</span>
-          `
+      <span class="popup-price">${formatPrice(totalPrice)}</span>
+      <span class="public-price">PRIX PUBLIC</span>
+      <span class="stock">Stock: ${productData.stock_quantity}</span>
+      `
     );
 
     checkbox.attr("data-product", JSON.stringify(productData));
@@ -385,13 +394,12 @@ $(document).ready(function () {
     const totalPrice = parseFloat(productData.price) * newQuantity;
     const product = $(`#product-${productId}`).closest(".custom-product");
     // product.find(".product-count").text(newQuantity);
-    product
-      .find(".product-price")
-      .html(
-        `${totalPrice.toFixed(
-          2
-        )} €<span class="public-price">PRIX PUBLIC</span>`
-      );
+    product.find(".product-price").html(
+      `
+      <span class="popup-price">${formatPrice(totalPrice)}</span>
+      <span class="public-price">PRIX PUBLIC</span>
+      `
+    );
 
     checkbox.attr("data-product", JSON.stringify(productData));
   });
@@ -457,6 +465,7 @@ $(document).ready(function () {
     saveSelectedProducts(superProductId, selectedProducts);
 
     $groupPopup.removeClass("visible");
+    $siteWrapper.removeClass("visible-wrapper");
   });
 
   // Open the selected products popup
@@ -489,9 +498,9 @@ $(document).ready(function () {
                               (Code: ${product.reference || "N/A"})
                             </div>
                             <div class="product-price">
-                              <span class="popup-price">
-                                ${parseFloat(product.price * product.quantity).toFixed(2)} €
-                              </span>
+                            <span class="popup-price">${formatPrice(
+                              product.price * product.quantity
+                            )}</span>
                             </div>
                           </div>
 
@@ -499,7 +508,7 @@ $(document).ready(function () {
                           <div class="product-actions">
                             <button class="btn-delete" data-product-id="${
                               product.id
-                            }">
+                            }" data-group-id="${group.id_group}">
                               <i class="material-icons float-xs-left">delete</i>
                             </button>
                             <div class="quantity-selector">
@@ -530,6 +539,7 @@ $(document).ready(function () {
 
     $groupPopup.removeClass("visible");
     $selectedProductsPopup.addClass("visible");
+    $siteWrapper.removeClass("visible-wrapper");
   });
 
   $selectedProductsPopup.on("click", ".btn-quantity", function (e) {
@@ -569,18 +579,21 @@ $(document).ready(function () {
     // Update the total price
     const totalPrice = parseFloat(productData.price) * newQuantity;
 
-    selectedProduct.find(".product-price").html(`${totalPrice.toFixed(2)} €`);
+    selectedProduct
+      .find(".product-price")
+      .html(`<span class="popup-price">${formatPrice(totalPrice)}</span>`);
 
     selectedProduct.attr("data-product", JSON.stringify(productData));
 
     $(".total").text(
-      `${selectedProducts
-        .reduce(
-          (acc, product) => acc + parseFloat(product.price) * product.quantity,
+      formatPrice(
+        selectedProducts.reduce(
+          (acc, product) => acc + product.price * product.quantity,
           0
         )
-        .toFixed(2)} €`
+      )
     );
+
     saveSelectedProducts(superProductId, selectedProducts);
     initProductActions();
   });
@@ -588,20 +601,23 @@ $(document).ready(function () {
   $selectedProductsPopup.on("click", ".btn-delete", function (e) {
     e.preventDefault();
     const productId = $(this).data("product-id");
+    const groupId = $(this).data("group-id");
 
     // Find and remove the product from selectedProducts
-    selectedProducts = selectedProducts.filter((p) => p.id != productId);
+    selectedProducts = selectedProducts.filter(
+      (p) => !(p.id == productId && p.id_group == groupId)
+    );
 
     // delete the ui row of the product
     $(`#selected-product-${productId}`).remove();
 
     $(".total").text(
-      `${selectedProducts
-        .reduce(
-          (acc, product) => acc + parseFloat(product.price) * product.quantity,
+      formatPrice(
+        selectedProducts.reduce(
+          (acc, product) => acc + product.price * product.quantity,
           0
         )
-        .toFixed(2)} €`
+      )
     );
 
     saveSelectedProducts(superProductId, selectedProducts);
@@ -706,6 +722,7 @@ $(document).ready(function () {
 
       // Hide the popup
       $selectedProductsPopup.removeClass("visible");
+      $siteWrapper.removeClass("visible-wrapper");
     };
 
     // Iterate over selected products and add them to the cart
@@ -715,11 +732,13 @@ $(document).ready(function () {
   // Close selected products popup
   $(".js-close-selected-popup").on("click", function () {
     $selectedProductsPopup.removeClass("visible");
+    $siteWrapper.removeClass("visible-wrapper");
   });
 
   // Close popup
   $(".js-close-popup").on("click", function () {
     $groupPopup.removeClass("visible");
+    $siteWrapper.removeClass("visible-wrapper");
   });
 
   // move .list-super-product-groups-images to the firs element in #product .page-content
