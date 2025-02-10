@@ -242,7 +242,7 @@ class SuperProductGroups extends Module
     );
 
     // Join product_shop for shop-specific details
-    $sql->innerJoin(
+    $sql->leftJoin(
       'product_shop',
       'ps',
       'p.id_product = ps.id_product AND ps.id_shop = ' . (int)\Shop::getContextShopID()

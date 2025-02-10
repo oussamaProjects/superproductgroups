@@ -132,12 +132,12 @@
 
 .add-product input {
 	display: inline-block;
-	width: calc(100% - 100px);
-	margin-right: 10px;
+	width: calc(100% - 112px);
+	margin-right: 8px;
 }
 
 .add-product button {
-	width: 80px;
+	width: 100px;
 }
 
 #autocomplete-dropdown {

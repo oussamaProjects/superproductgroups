@@ -174,7 +174,7 @@
 
 .visible-wrapper {
   overflow: hidden;
-  background: rgba(29, 16, 96, 0.35);
+  background: rgba(29, 16, 96, 0.35) !important;
 }
 
 .btn-close {
@@ -698,6 +698,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .has-product-groups .page-content .list-super-product-groups-images li img {

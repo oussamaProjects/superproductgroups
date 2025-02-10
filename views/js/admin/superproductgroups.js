@@ -173,9 +173,10 @@ $(document).ready(function () {
     $("#category-list .list-group-item").each(function (index) {
       console.log("index", index);
       const $item = $(this);
-      // $item.find(".category-order").text(index + 1); // Update the category order display
+      // $item.find(".group-order").text(index + 1); // Update the group order display
       $item.find(".js-group-order").val(index + 1); // Update the product order display
-      $item.data("category-order", index + 1); // Optionally update an order attribute
+      $item.find(".group-order").text(index + 1); // Update the product order display
+      $item.data("group-order", index + 1); // Optionally update an order attribute
     });
   }
 

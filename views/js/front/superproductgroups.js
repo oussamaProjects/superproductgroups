@@ -674,6 +674,8 @@ $(document).ready(function () {
           id_customization: 0, // If customization is not required
           id_product_attribute: 0, // If no specific attribute is selected
           qty: product.quantity, // Adjust quantity as needed
+          id_super_product: superProductId, // If no specific attribute is selected
+          quantity: product.quantity, // Adjust quantity as needed
           custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
         },
         success: function () {
