@@ -549,7 +549,7 @@ $(document).ready(function () {
 
     $groupPopup.removeClass("visible");
     $selectedProductsPopup.addClass("visible");
-    $siteWrapper.removeClass("visible-wrapper");
+    $siteWrapper.addClass("visible-wrapper");
   });
 
   $selectedProductsPopup.on("click", ".btn-quantity", function (e) {

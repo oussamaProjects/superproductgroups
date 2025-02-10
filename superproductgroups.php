@@ -336,11 +336,11 @@ class SuperProductGroups extends Module
    */
   public function hookActionProductFormBuilderModifier(array $params): void
   {
-    $formBuilder = $params['form_builder'];
-    $formBuilder->add('the_group_tab', GroupFormType::class, [
-      'label' => 'Product Groups',
-      'required' => false,
-    ]);
+    // $formBuilder = $params['form_builder'];
+    // $formBuilder->add('the_group_tab', GroupFormType::class, [
+    //   'label' => 'Product Groups',
+    //   'required' => false,
+    // ]);
   }
 
   public function hookDisplayProductAdditionalInfo($params)
@@ -484,6 +484,7 @@ class SuperProductGroups extends Module
          AND id_super_product = ' . (int)$superProductId
     );
   }
+
   private function saveCustomFieldsToCart($cartId, $productId, $superProductId, $quantity, $customFields)
   {
     $db = Db::getInstance();

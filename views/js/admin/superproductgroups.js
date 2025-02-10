@@ -510,3 +510,49 @@ $(document).ready(function () {
     });
   });
 });
+
+$(document).ready(function () {
+  setTimeout(() => {
+    const $tabsContainer = $("#product-tabs .nav-tabs");
+    const $contentContainer = $("#product-tabs-content");
+    const $groupForm = $("#group-form"); // Clone the form only once
+
+    if (!$tabsContainer.length || !$contentContainer.length) {
+      console.warn("Tab container not found.");
+      return;
+    }
+
+    // Prevent duplicate tab creation
+    if ($("#super_product_groups-tab").length) {
+      return;
+    }
+
+    // Create new tab button
+    const newTabButton = $(`
+      <li id="super_product_groups-tab-nav" class="nav-item">
+        <a href="#super_product_groups-tab" role="tab" data-toggle="tab" class="nav-link" aria-selected="false">
+          Super Product Groups
+        </a>
+      </li>
+    `).appendTo($tabsContainer);
+
+    // Create and append tab content area
+    const newTabContent = $(`
+      <div role="tabpanel" class="form-contenttab tab-pane container-fluid super_product_groups-tab" id="super_product_groups-tab">
+        <div class="card">
+          <div class="card-body"></div>
+        </div>
+      </div>
+    `).appendTo($contentContainer);
+
+    // Insert cloned group form
+    newTabContent.find(".card-body").append($groupForm);
+
+    // Handle tab switching
+    $(document).on("click", "#super_product_groups-tab-nav", function (e) {
+      e.preventDefault();
+      $(".tab-pane").removeClass("show active");
+      $("#super_product_groups-tab").addClass("show active");
+    });
+  }, 500);
+});
