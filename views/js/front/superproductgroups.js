@@ -37,24 +37,30 @@ $(document).ready(function () {
    * Formats a price according to the PrestaShop locale and currency settings.
    * @param {number} amount - The price amount to format.
    * @returns {string} - The formatted price with the correct decimal separator and currency symbol.
-   */ 
+   */
   function formatPrice(amount) {
     amount = parseFloat(amount);
     if (isNaN(amount)) return "0.00"; // Handle invalid numbers
-  
+
     // Get formatted price
-    let formattedPrice = amount.toLocaleString(prestashop.language.iso_code || "en-US", {
-      style: "currency",
-      currency: prestashop.currency.iso_code || "EUR", // Default to EUR if missing
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  
+    let formattedPrice = amount.toLocaleString(
+      prestashop.language.iso_code || "en-US",
+      {
+        style: "currency",
+        currency: prestashop.currency.iso_code || "EUR", // Default to EUR if missing
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }
+    );
+
     // Regex to extract currency symbol from formatted string
     const currencySymbol = formattedPrice.replace(/[\d.,\s]+/g, "").trim();
-  
+
     // Wrap currency symbol in a <span>
-    return formattedPrice.replace(currencySymbol, `<span class="currency-symbol">${currencySymbol}</span>`);
+    return formattedPrice.replace(
+      currencySymbol,
+      `<span class="currency-symbol">${currencySymbol}</span>`
+    );
   }
 
   function checkProductGroups(superProductId) {
@@ -215,7 +221,7 @@ $(document).ready(function () {
                               <span class="popup-price">
                                 ${formatPrice(
                                   product.price * product.quantity
-                                )}  
+                                )}
                               </span>
                               </div>
                             </div>
@@ -331,8 +337,8 @@ $(document).ready(function () {
                 <div class="product-price">
                   <span class="popup-price">
                   ${formatPrice(product.price)}
-                  </span> 
-                  <span class="public-price">PRIX PUBLIC</span> 
+                  </span>
+                  <span class="public-price">PRIX PUBLIC</span>
                   <span class="stock">Stock: ${product.stock_quantity}</span>
                 </div>
 
@@ -655,6 +661,9 @@ $(document).ready(function () {
     const totalProducts = selectedProducts.length;
     let addedProducts = 0;
 
+    // Retrieve the token from the hidden input field
+    const csrfToken = $("input[name='token']").val() || null;
+
     const addToCart = (product) => {
       // Prepare custom data to associate the product with the main product
       const customFields = {
@@ -663,21 +672,28 @@ $(document).ready(function () {
         is_associated: true, // Mark as associated with a main product
       };
 
+      const requestData = {
+        ajax: 1,
+        action: "update",
+        add: 1,
+        id_product: product.id,
+        id_customization: 0, // If customization is not required
+        id_product_attribute: 0, // If no specific attribute is selected
+        qty: product.quantity, // Adjust quantity as needed
+        id_super_product: superProductId, // If no specific attribute is selected
+        quantity: product.quantity, // Adjust quantity as needed
+        custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
+      };
+
+      // Add token if available (only for logged-in users)
+      if (csrfToken) {
+        requestData.token = csrfToken;
+      }
+
       $.ajax({
         url: prestashop.urls.pages.cart, // Use PrestaShop's built-in cart URL
         type: "POST",
-        data: {
-          ajax: 1,
-          action: "update",
-          add: 1,
-          id_product: product.id,
-          id_customization: 0, // If customization is not required
-          id_product_attribute: 0, // If no specific attribute is selected
-          qty: product.quantity, // Adjust quantity as needed
-          id_super_product: superProductId, // If no specific attribute is selected
-          quantity: product.quantity, // Adjust quantity as needed
-          custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
-        },
+        data: requestData,
         success: function () {
           addedProducts++;
 

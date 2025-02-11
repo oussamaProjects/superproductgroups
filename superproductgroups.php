@@ -437,13 +437,11 @@ class SuperProductGroups extends Module
         }
       }
 
-      // Initialize customFields if empty or missing super_product_id
       if (empty($superProductID)) {
         $superProductID = 0;
         error_log('Custom Fields initialized with default data: ' . print_r($customFields, true));
       }
 
-      // If a product ID is provided, remove duplicates for the same super_product_id
       if ($currentProductId) {
         // $this->removeProductsFromCartByProductAndMainProduct($cart->id, $currentProductId, $customFields['super_product_id']);
         // $this->deleteCustomFieldsByProductAndMainProduct($cart->id, $currentProductId, $customFields['super_product_id']);
@@ -460,7 +458,6 @@ class SuperProductGroups extends Module
 
   private function removeProductsFromCartByProductAndMainProduct($cartId, $productId, $superProductId)
   {
-    // Delete the specific product with the given super_product_id
     Db::getInstance()->delete(
       'cart_product',
       'id_cart = ' . (int)$cartId . '
@@ -476,7 +473,6 @@ class SuperProductGroups extends Module
 
   private function deleteCustomFieldsByProductAndMainProduct($cartId, $productId, $superProductId)
   {
-    // Delete the custom fields for the specific product with the given super_product_id
     Db::getInstance()->delete(
       'superproduct_cart_custom_fields',
       'id_cart = ' . (int)$cartId . '
@@ -545,6 +541,62 @@ class SuperProductGroups extends Module
       ['id_order' => (int) $order->id],
       'id_order = ' . (int) $cartId
     );
+  }
+
+  public function hookDisplayOrderConfirmation($params)
+  {
+      $order = $params['order'];
+      $orderId = (int) $order->id;
+      $languageId = (int) $this->context->language->id;
+  
+      // Get the cart ID associated with the order
+      $cartId = Db::getInstance()->getValue(
+          'SELECT id_cart FROM ' . _DB_PREFIX_ . 'orders WHERE id_order = ' . $orderId
+      );
+  
+      if (!$cartId) {
+          return '<p>No cart associated with this order.</p>';
+      }
+  
+      // Fetch product details, including super product information
+      $query = '
+          SELECT 
+              ccf.id_product,
+              pl.name AS product_name,
+              COALESCE(pl_super.name, "Unassociated") AS super_product_name,
+              ccf.id_super_product AS super_product_id,
+              SUM(ccf.quantity) AS total_quantity
+          FROM ' . _DB_PREFIX_ . 'superproduct_cart_custom_fields ccf
+          INNER JOIN ' . _DB_PREFIX_ . 'product_lang pl
+              ON ccf.id_product = pl.id_product 
+              AND pl.id_lang = ' . (int)$languageId . '
+          LEFT JOIN ' . _DB_PREFIX_ . 'product_lang pl_super
+              ON ccf.id_super_product = pl_super.id_product 
+              AND pl_super.id_lang = ' . (int)$languageId . '
+          WHERE ccf.id_cart = ' . (int)$cartId . '
+          GROUP BY ccf.id_product, ccf.id_super_product';
+  
+      $customFields = Db::getInstance()->executeS($query);
+  
+      // Format data properly
+      $products = array_map(function ($field) {
+          return [
+              'product_name' => $field['product_name'],
+              'super_product_name' => $field['super_product_name'],
+              'super_product_id' => $field['super_product_id'],
+              'total_quantity' => $field['total_quantity'],
+          ];
+      }, $customFields);
+  
+      // Assign data to Smarty for rendering
+      $this->context->smarty->assign([
+          'orderId' => $orderId,
+          'languageId' => $languageId,
+          'orderProducts' => $products, // Pass processed products
+      ]);
+  
+      // Return the rendered template
+      return $this->display(__FILE__, 'views/templates/hook/order-confirmation.tpl');
   }
 
   public function hookDisplayAdminOrderMain($params)
