@@ -652,73 +652,173 @@ $(document).ready(function () {
     addToCart(prestashop.urls.pages.order + "?action=show");
   });
 
+  // function addToCart(redirectUrl) {
+  //   if (!selectedProducts || selectedProducts.length === 0) {
+  //     console.warn("No products selected to add to the cart.");
+  //     return;
+  //   }
+
+  //   const totalProducts = selectedProducts.length;
+  //   let addedProducts = 0;
+
+  //   // Retrieve the token from the hidden input field
+  //   const csrfToken = $("input[name='token']").val() || null;
+
+  //   const addToCart = (product) => {
+  //     // Prepare custom data to associate the product with the main product
+  //     const customFields = {
+  //       super_product_id: superProductId, // Main product ID for association
+  //       quantity: product.quantity, // Main product ID for association
+  //       is_associated: true, // Mark as associated with a main product
+  //     };
+
+  //     const requestData = {
+  //       ajax: 1,
+  //       action: "update",
+  //       add: 1,
+  //       id_product: product.id,
+  //       id_customization: 0, // If customization is not required
+  //       id_product_attribute: 0, // If no specific attribute is selected
+  //       qty: product.quantity, // Adjust quantity as needed
+  //       id_super_product: superProductId, // If no specific attribute is selected
+  //       quantity: product.quantity, // Adjust quantity as needed
+  //       custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
+  //     };
+
+  //     // Add token if available (only for logged-in users)
+  //     if (csrfToken) {
+  //       requestData.token = csrfToken;
+  //     }
+
+  //     $.ajax({
+  //       url: prestashop.urls.pages.cart, // Use PrestaShop's built-in cart URL
+  //       type: "POST",
+  //       data: requestData,
+  //       success: function () {
+  //         addedProducts++;
+
+  //         // Check if all products are added
+  //         if (addedProducts === totalProducts) {
+  //           showCompletionEffect();
+  //         }
+  //       },
+  //       error: function (xhr) {
+  //         console.error(
+  //           `Error adding product ${product.name} to cart:`,
+  //           xhr.responseText
+  //         );
+  //       },
+  //     });
+  //   };
+
+  //   const showCompletionEffect = () => {
+  //     // Add a success message
+  //     const $successMessage = $("<div>", {
+  //       class: "cart-success-message",
+  //       text: "All selected products have been added to the cart!",
+  //     }).appendTo("body");
+
+  //     // Style the success message
+  //     $successMessage.css({
+  //       position: "fixed",
+  //       top: "20px",
+  //       right: "20px",
+  //       background: "#28a745",
+  //       color: "#fff",
+  //       padding: "10px 20px",
+  //       borderRadius: "5px",
+  //       zIndex: 1000,
+  //       display: "none",
+  //     });
+
+  //     // Show the success message with fade-in effect
+  //     $successMessage
+  //       .fadeIn(300)
+  //       .delay(1500)
+  //       .fadeOut(300, function () {
+  //         $(this).remove(); // Remove the message after fading out
+  //       });
+
+  //     // clearSelectedProducts(superProductId);
+  //     if (redirectUrl) {
+  //       window.location.href = redirectUrl;
+  //     } else {
+  //       window.location.reload();
+  //     }
+
+  //     // Hide the popup
+  //     $selectedProductsPopup.removeClass("visible");
+  //     $siteWrapper.removeClass("visible-wrapper");
+  //   };
+
+  //   // Iterate over selected products and add them to the cart
+  //   selectedProducts.forEach(addToCart);
+  // }
+
   function addToCart(redirectUrl) {
     if (!selectedProducts || selectedProducts.length === 0) {
       console.warn("No products selected to add to the cart.");
       return;
     }
-
-    const totalProducts = selectedProducts.length;
-    let addedProducts = 0;
-
+  
     // Retrieve the token from the hidden input field
     const csrfToken = $("input[name='token']").val() || null;
-
-    const addToCart = (product) => {
-      // Prepare custom data to associate the product with the main product
+  
+    // Clone the selected products to avoid modifying the original array
+    const productsQueue = [...selectedProducts];
+  
+    function processNextProduct() {
+      if (productsQueue.length === 0) {
+        // All products have been added
+        showCompletionEffect();
+        return;
+      }
+  
+      const product = productsQueue.shift(); // Get the next product from the queue
+  
       const customFields = {
-        super_product_id: superProductId, // Main product ID for association
-        quantity: product.quantity, // Main product ID for association
-        is_associated: true, // Mark as associated with a main product
+        super_product_id: superProductId,
+        quantity: product.quantity,
+        is_associated: true,
       };
-
+  
       const requestData = {
         ajax: 1,
         action: "update",
         add: 1,
         id_product: product.id,
-        id_customization: 0, // If customization is not required
-        id_product_attribute: 0, // If no specific attribute is selected
-        qty: product.quantity, // Adjust quantity as needed
-        id_super_product: superProductId, // If no specific attribute is selected
-        quantity: product.quantity, // Adjust quantity as needed
-        custom_fields: JSON.stringify(customFields), // Pass custom data as a JSON string
+        id_customization: 0,
+        id_product_attribute: 0,
+        qty: product.quantity,
+        id_super_product: superProductId,
+        custom_fields: JSON.stringify(customFields),
       };
-
-      // Add token if available (only for logged-in users)
+  
       if (csrfToken) {
         requestData.token = csrfToken;
       }
-
+  
       $.ajax({
-        url: prestashop.urls.pages.cart, // Use PrestaShop's built-in cart URL
+        url: prestashop.urls.pages.cart,
         type: "POST",
         data: requestData,
         success: function () {
-          addedProducts++;
-
-          // Check if all products are added
-          if (addedProducts === totalProducts) {
-            showCompletionEffect();
-          }
+          // Process the next product in the queue
+          processNextProduct();
         },
         error: function (xhr) {
-          console.error(
-            `Error adding product ${product.name} to cart:`,
-            xhr.responseText
-          );
+          console.error(`Error adding product ${product.name} to cart:`, xhr.responseText);
+          processNextProduct(); // Continue with the next product even if this one fails
         },
       });
-    };
-
-    const showCompletionEffect = () => {
-      // Add a success message
+    }
+  
+    function showCompletionEffect() {
       const $successMessage = $("<div>", {
         class: "cart-success-message",
         text: "All selected products have been added to the cart!",
       }).appendTo("body");
-
-      // Style the success message
+  
       $successMessage.css({
         position: "fixed",
         top: "20px",
@@ -730,29 +830,23 @@ $(document).ready(function () {
         zIndex: 1000,
         display: "none",
       });
-
-      // Show the success message with fade-in effect
-      $successMessage
-        .fadeIn(300)
-        .delay(1500)
-        .fadeOut(300, function () {
-          $(this).remove(); // Remove the message after fading out
-        });
-
-      // clearSelectedProducts(superProductId);
+  
+      $successMessage.fadeIn(300).delay(1500).fadeOut(300, function () {
+        $(this).remove();
+      });
+  
       if (redirectUrl) {
         window.location.href = redirectUrl;
       } else {
         window.location.reload();
       }
-
-      // Hide the popup
+  
       $selectedProductsPopup.removeClass("visible");
       $siteWrapper.removeClass("visible-wrapper");
-    };
-
-    // Iterate over selected products and add them to the cart
-    selectedProducts.forEach(addToCart);
+    }
+  
+    // Start processing the products sequentially
+    processNextProduct();
   }
 
   // Close selected products popup
