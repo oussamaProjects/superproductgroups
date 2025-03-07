@@ -169,6 +169,8 @@ $(document).ready(function () {
     },
   });
 
+  updateCategoryOrder();
+
   function updateCategoryOrder() {
     $("#category-list .list-group-item").each(function (index) {
       console.log("index", index);

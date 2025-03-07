@@ -73,7 +73,7 @@ class SuperProductGroups extends Module
   {
     $this->context->controller->addCSS('https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css');
     $this->context->controller->addCSS('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
-    $this->context->controller->addCSS('https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css');
+    // $this->context->controller->addCSS('https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css');
 
     // Add your custom JS and CSS files
     $this->context->controller->addJS($this->_path . 'views/js/admin/superproductgroups.js');
@@ -548,19 +548,19 @@ class SuperProductGroups extends Module
       $order = $params['order'];
       $orderId = (int) $order->id;
       $languageId = (int) $this->context->language->id;
-  
+
       // Get the cart ID associated with the order
       $cartId = Db::getInstance()->getValue(
           'SELECT id_cart FROM ' . _DB_PREFIX_ . 'orders WHERE id_order = ' . $orderId
       );
-  
+
       if (!$cartId) {
           return '<p>No cart associated with this order.</p>';
       }
-  
+
       // Fetch product details, including super product information
       $query = '
-          SELECT 
+          SELECT
               ccf.id_product,
               pl.name AS product_name,
               COALESCE(pl_super.name, "Unassociated") AS super_product_name,
@@ -568,16 +568,16 @@ class SuperProductGroups extends Module
               SUM(ccf.quantity) AS total_quantity
           FROM ' . _DB_PREFIX_ . 'superproduct_cart_custom_fields ccf
           INNER JOIN ' . _DB_PREFIX_ . 'product_lang pl
-              ON ccf.id_product = pl.id_product 
+              ON ccf.id_product = pl.id_product
               AND pl.id_lang = ' . (int)$languageId . '
           LEFT JOIN ' . _DB_PREFIX_ . 'product_lang pl_super
-              ON ccf.id_super_product = pl_super.id_product 
+              ON ccf.id_super_product = pl_super.id_product
               AND pl_super.id_lang = ' . (int)$languageId . '
           WHERE ccf.id_cart = ' . (int)$cartId . '
           GROUP BY ccf.id_product, ccf.id_super_product';
-  
+
       $customFields = Db::getInstance()->executeS($query);
-  
+
       // Format data properly
       $products = array_map(function ($field) {
           return [
@@ -587,14 +587,14 @@ class SuperProductGroups extends Module
               'total_quantity' => $field['total_quantity'],
           ];
       }, $customFields);
-  
+
       // Assign data to Smarty for rendering
       $this->context->smarty->assign([
           'orderId' => $orderId,
           'languageId' => $languageId,
           'orderProducts' => $products, // Pass processed products
       ]);
-  
+
       // Return the rendered template
       return $this->display(__FILE__, 'views/templates/hook/order-confirmation.tpl');
   }
